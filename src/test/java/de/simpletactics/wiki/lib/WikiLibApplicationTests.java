@@ -1,4 +1,4 @@
-package de.simpletactics.wikilib;
+package de.simpletactics.wiki.lib;
 
 import org.springframework.boot.test.context.SpringBootTest;
 

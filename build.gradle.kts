@@ -31,6 +31,9 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("javax.annotation:javax.annotation-api:1.2-b01")
+	implementation("com.google.code.gson:gson:2.7")
+
 }
 
 tasks.getByName<Jar>("jar") {
@@ -47,7 +50,7 @@ tasks.wrapper {
 }
 
 tasks.bootJar {
-	mainClass.set("de.simpletactics.backend.Application.kt")
+	mainClass.set("de.simpletactics.wiki.lib.Application")
 
 	archiveFileName.set("backend.jar")
 	exclude("**/application-secrets.properties")
