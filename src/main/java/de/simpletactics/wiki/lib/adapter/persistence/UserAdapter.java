@@ -1,5 +1,6 @@
 package de.simpletactics.wiki.lib.adapter.persistence;
 
+import de.simpletactics.wiki.lib.service.port.UserPort;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;

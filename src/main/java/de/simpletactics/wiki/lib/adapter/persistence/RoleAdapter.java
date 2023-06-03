@@ -1,7 +1,10 @@
 package de.simpletactics.wiki.lib.adapter.persistence;
 
+import de.simpletactics.wiki.lib.adapter.dto.RoleDetailResponseDto;
+import de.simpletactics.wiki.lib.service.port.RolePort;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;

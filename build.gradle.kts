@@ -33,6 +33,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("javax.annotation:javax.annotation-api:1.2-b01")
 	implementation("com.google.code.gson:gson:2.7")
+	implementation("org.apache.commons:commons-collections4:4.4")
 
 }
 
