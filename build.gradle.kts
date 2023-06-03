@@ -4,6 +4,8 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 plugins {
 	java
+	`maven-publish`
+
 	id("org.springframework.boot")
 	// id("io.spring.dependency-management") version "1.1.0"
 
@@ -12,6 +14,7 @@ plugins {
 
 	// Check for dependency upgrades
 	id("com.github.ben-manes.versions")
+
 }
 
 apply(plugin = "io.spring.dependency-management")
@@ -70,3 +73,17 @@ tasks.register("bootRunLocal") {
 	}
 	finalizedBy("bootRun")
 }
+
+publishing {
+	publications {
+		create<MavenPublication>("maven") {
+			groupId = "de.simpletactics"
+			artifactId = "library"
+			version = "0.1"
+
+			from(components["java"])
+		}
+	}
+}
+
+
