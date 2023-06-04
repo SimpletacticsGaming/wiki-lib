@@ -29,6 +29,18 @@ repositories {
 	mavenCentral()
 }
 
+java {
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
+
+	withSourcesJar()
+	withJavadocJar()
+}
+
+repositories {
+	mavenCentral()
+}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 	compileOnly("org.projectlombok:lombok")
@@ -54,6 +66,8 @@ tasks.wrapper {
 }
 
 tasks.bootJar {
+	enabled = true
+	archiveClassifier.set("")
 	mainClass.set("de.simpletactics.wiki.lib.Application")
 
 	archiveFileName.set("backend.jar")
@@ -78,9 +92,8 @@ publishing {
 	publications {
 		create<MavenPublication>("maven") {
 			groupId = "de.simpletactics"
-			artifactId = "library"
-			version = "0.1"
-
+			artifactId = "wiki-lib"
+			version = version
 			from(components["java"])
 		}
 	}
