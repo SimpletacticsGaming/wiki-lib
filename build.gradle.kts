@@ -1,3 +1,6 @@
+import org.gradle.internal.classpath.Instrumented.systemProperty
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
+
 group = "de.simpletactics"
 version = "0.0.1"
 java.sourceCompatibility = JavaVersion.VERSION_17
