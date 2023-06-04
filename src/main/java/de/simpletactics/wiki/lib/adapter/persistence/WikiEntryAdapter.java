@@ -1,6 +1,7 @@
 package de.simpletactics.wiki.lib.adapter.persistence;
 
 import de.simpletactics.wiki.lib.service.port.WikiEntryPort;
+import de.simpletactics.wiki.lib.service.port.WikiRightsPort;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ public class WikiEntryAdapter implements WikiEntryPort {
 
   private final JdbcTemplate jdbc;
   @Autowired
-  private WikiRightsAdapter wikiRightsAdapter;
+  private WikiRightsPort wikiRightsPort;
 
   public WikiEntryAdapter(JdbcTemplate jdbcTemplate) {
     this.jdbc = jdbcTemplate;
@@ -85,8 +86,8 @@ public class WikiEntryAdapter implements WikiEntryPort {
     List<Map<String, Object>> deleted = getContent(id);
     createDeleted(topid, id, deleted.get(0).get("topic").toString(),
         deleted.get(0).get("content").toString(), deleted.get(0).get("type").toString());
-    wikiRightsAdapter.deleteWikiAllRights(id);
-    wikiRightsAdapter.deleteWikiDefaultRead(id);
+    wikiRightsPort.deleteWikiAllRights(id);
+    wikiRightsPort.deleteWikiDefaultRead(id);
     jdbc.execute("DELETE FROM wiki_link WHERE subid=" + id + ";");
     jdbc.execute("DELETE FROM wiki WHERE id=" + id + ";");
 
@@ -112,12 +113,12 @@ public class WikiEntryAdapter implements WikiEntryPort {
       createDeleted(String.valueOf(id), Integer.parseInt(content.get("id").toString()),
           content.get("topic").toString(), content.get("content").toString(),
           content.get("type").toString());
-      wikiRightsAdapter.deleteWikiAllRights(Integer.parseInt(content.get("id").toString()));
-      wikiRightsAdapter.deleteWikiDefaultRead(Integer.parseInt(content.get("id").toString()));
+      wikiRightsPort.deleteWikiAllRights(Integer.parseInt(content.get("id").toString()));
+      wikiRightsPort.deleteWikiDefaultRead(Integer.parseInt(content.get("id").toString()));
     }
 
-    wikiRightsAdapter.deleteWikiAllRights(id);
-    wikiRightsAdapter.deleteWikiDefaultRead(id);
+    wikiRightsPort.deleteWikiAllRights(id);
+    wikiRightsPort.deleteWikiDefaultRead(id);
     jdbc.execute(
         "DELETE w FROM wiki AS w INNER JOIN wiki_link AS wl ON w.id = wl.subid WHERE wl.topid = '"
             + id + "' AND w.type = '2';");

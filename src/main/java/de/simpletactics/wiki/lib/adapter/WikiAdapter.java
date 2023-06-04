@@ -1,9 +1,10 @@
-package de.simpletactics.wiki.lib.service;
+package de.simpletactics.wiki.lib.adapter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.simpletactics.wiki.lib.model.Type;
 import de.simpletactics.wiki.lib.service.port.WikiEntryPort;
+import de.simpletactics.wiki.lib.service.port.WikiPort;
 import de.simpletactics.wiki.lib.service.port.WikiRightsPort;
 import de.simpletactics.wiki.lib.util.WikiMapper;
 import java.util.ArrayList;
@@ -11,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @AllArgsConstructor
-public class WikiService {
+public class WikiAdapter implements WikiPort {
 
   private WikiEntryPort wikiEntryPort;
   private WikiRightsPort wikiRightsPort;
