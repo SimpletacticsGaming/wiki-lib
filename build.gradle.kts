@@ -60,14 +60,8 @@ tasks.wrapper {
 }
 
 tasks.bootJar {
-	enabled = true
-	archiveClassifier.set("")
-	mainClass.set("de.simpletactics.wiki.lib.Application")
-
-	exclude("**/application-secrets.properties")
-	exclude("**/application-secrets.yml")
-	exclude("**/application-secrets.yaml")
-	exclude("**/*.MD")
+	enabled = false
+	mainClass.set("de.simpletactics.Application")
 }
 
 tasks.register("bootRunLocal") {
