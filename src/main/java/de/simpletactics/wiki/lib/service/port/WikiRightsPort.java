@@ -10,4 +10,14 @@ public interface WikiRightsPort {
   void deleteWikiAllRights(int wikiId);
 
   void setWikiRightsCopyOvertopic(int wikiId, int overtopicId);
+
+  int getWikiDefaultRead(int wikiId);
+
+  void addWikiUserRight(int wikiId, String username, String wikiRight, boolean recursive);
+
+  void deleteWikiUserRight(int wikiId, String username);
+
+  void addWikiRoleRight(int wikiId, int role, String wikiRight, boolean recursive);
+
+  void setWikiDefaultRead(int wikiId, int roleId);
 }
