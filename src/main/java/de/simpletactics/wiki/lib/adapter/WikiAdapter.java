@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
+@SuppressWarnings("unchecked")
 public class WikiAdapter implements WikiPort {
 
   private WikiEntryPort wikiEntryPort;
