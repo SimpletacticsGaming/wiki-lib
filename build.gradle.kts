@@ -63,6 +63,12 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
+tasks.jar {
+	enabled = true
+	archiveClassifier.set("")
+	manifest.attributes["Main-Class"] = "de.simpletactics.wiki.lib.Application"
+}
+
 tasks.wrapper {
 	val versionGradle: String by project
 	gradleVersion = versionGradle
@@ -73,7 +79,6 @@ tasks.bootJar {
 	archiveClassifier.set("")
 	mainClass.set("de.simpletactics.wiki.lib.Application")
 
-	archiveFileName.set("backend.jar")
 	exclude("**/application-secrets.properties")
 	exclude("**/application-secrets.yml")
 	exclude("**/application-secrets.yaml")
