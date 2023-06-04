@@ -1,29 +1,17 @@
 group = "de.simpletactics"
 version = "0.0.1"
-java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
 	java
 	`maven-publish`
 
 	id("org.springframework.boot")
-	// id("io.spring.dependency-management") version "1.1.0"
-
-	// genertates git.properties (git metadata)
 	id("com.gorylenko.gradle-git-properties")
-
-	// Check for dependency upgrades
 	id("com.github.ben-manes.versions")
 
 }
 
 apply(plugin = "io.spring.dependency-management")
-
-configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
-	}
-}
 
 repositories {
 	mavenCentral()
@@ -34,7 +22,7 @@ java {
 	targetCompatibility = JavaVersion.VERSION_11
 
 	withSourcesJar()
-//	withJavadocJar()
+	withJavadocJar()
 }
 
 repositories {
