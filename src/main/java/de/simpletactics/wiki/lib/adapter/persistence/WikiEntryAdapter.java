@@ -120,7 +120,7 @@ public class WikiEntryAdapter implements WikiEntryPort {
     wikiRightsPort.deleteWikiAllRights(id);
     wikiRightsPort.deleteWikiDefaultRead(id);
     jdbc.execute(
-        "DELETE w FROM wiki AS w INNER JOIN wiki_link AS wl ON w.id = wl.subid WHERE wl.topid = '"
+        "DELETE FROM wiki AS w USING wiki_link AS wl WHERE w.id = wl.subid AND wl.topid = '"
             + id + "' AND w.type = '2';");
     jdbc.execute("DELETE FROM wiki_link WHERE topid=" + id + ";");
     jdbc.execute("DELETE FROM wiki WHERE id = '" + id + "';");
