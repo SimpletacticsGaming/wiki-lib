@@ -170,6 +170,6 @@ public class WikiEntryAdapter implements WikiEntryPort {
       sNewOrder = newOrder.get(0).get("order").toString();
     }
     jdbc.execute(
-        "INSERT INTO wiki_link (topid, subid, order) values('" + topid + "', '" + subid + "','" + sNewOrder + "');");
+        "INSERT INTO wiki_link values('" + topid + "', '" + subid + "','" + sNewOrder + "');");
   }
 }
