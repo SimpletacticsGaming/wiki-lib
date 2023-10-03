@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public class SubjectEntry {
 
-  private final Type type = Type.THEMENBEREICH;
+  private final WikiType wikiType = WikiType.THEMENBEREICH;
   private int id;
   private String title;
   private List<SubjectEntry> subjectEntries;
