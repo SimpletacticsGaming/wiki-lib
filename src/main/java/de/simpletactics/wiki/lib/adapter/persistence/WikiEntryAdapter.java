@@ -120,7 +120,7 @@ public class WikiEntryAdapter implements WikiEntryPort {
     wikiRightsPort.deleteWikiAllRights(id);
     wikiRightsPort.deleteWikiDefaultRead(id);
     jdbc.execute(
-        "DELETE w FROM wiki AS w INNER JOIN wiki_link AS wl ON w.id = wl.subid WHERE wl.topid = '"
+        "DELETE FROM wiki AS w USING wiki_link AS wl WHERE w.id = wl.subid AND wl.topid = '"
             + id + "' AND w.type = '2';");
     jdbc.execute("DELETE FROM wiki_link WHERE topid=" + id + ";");
     jdbc.execute("DELETE FROM wiki WHERE id = '" + id + "';");
@@ -140,9 +140,9 @@ public class WikiEntryAdapter implements WikiEntryPort {
     } else {
       deletedId = newDeletedId.get(0).get("id").toString();
     }
-    jdbc.execute("INSERT INTO wiki_deleted SET id = '" + deletedId + "', linked_to_id = '" + topid
-        + "', deleted_id = '" + id + "', topic = '" + topic + "', content = '" + content
-        + "', type = '" + type + "', delete_date = (SELECT now());");
+    jdbc.execute("INSERT INTO wiki_deleted (id, linked_to_id, deleted_id, topic, content, type, delete_date)" +
+      "values('" + deletedId + "', '" + topid + "', '" + id + "', '" + topic + "', '" + content + "', '" + 
+      type + "', (SELECT now()));");
   }
 
   //Methode legt neue ID in DB-Tabelle "wiki" zusammen mit dem übergebenen Eintrags-Typ an und gibt diese zurück.
@@ -161,8 +161,8 @@ public class WikiEntryAdapter implements WikiEntryPort {
   @Override
   public void linkIds(int topid, int subid) {
     List<Map<String, Object>> newOrder = jdbc.queryForList(
-        "SELECT `order` + 1 as `order` FROM wiki_link WHERE topid = '" + topid
-            + "' ORDER BY `order` DESC LIMIT 1;");
+        "SELECT wl.order + 1 as order FROM wiki_link as wl WHERE topid = '" + topid
+            + "' ORDER BY wl.order DESC LIMIT 1;");
     String sNewOrder;
     if (newOrder.isEmpty()) {
       sNewOrder = "1";
@@ -170,7 +170,6 @@ public class WikiEntryAdapter implements WikiEntryPort {
       sNewOrder = newOrder.get(0).get("order").toString();
     }
     jdbc.execute(
-        "INSERT INTO wiki_link SET topid = '" + topid + "', subid = '" + subid + "', `order` = '"
-            + sNewOrder + "';");
+        "INSERT INTO wiki_link values('" + topid + "', '" + subid + "','" + sNewOrder + "');");
   }
 }
