@@ -1,5 +1,7 @@
 package de.simpletactics.wiki.lib.service.port;
 
+import de.simpletactics.wiki.lib.model.WikiType;
+
 public interface WikiPort {
 
   String getTopicsAsJson(int id, String username);
@@ -17,5 +19,7 @@ public interface WikiPort {
   void deleteTopic(int id);
 
   void deleteEntry(int id);
+
+  WikiType getWikiType(int id);
 
 }

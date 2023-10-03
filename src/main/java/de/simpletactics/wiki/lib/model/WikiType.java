@@ -1,8 +1,9 @@
 package de.simpletactics.wiki.lib.model;
 
-public enum Type {
+public enum WikiType {
 
   THEMENBEREICH,
-  STANDARDEINTRAG
+  STANDARDEINTRAG,
+  POLL,
 
 }

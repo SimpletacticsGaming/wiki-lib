@@ -4,7 +4,7 @@ import de.simpletactics.wiki.lib.model.Right;
 import de.simpletactics.wiki.lib.model.WikiEntry;
 import de.simpletactics.wiki.lib.model.WikiNavigation;
 import de.simpletactics.wiki.lib.model.SubjectEntry;
-import de.simpletactics.wiki.lib.model.Type;
+import de.simpletactics.wiki.lib.model.WikiType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +13,7 @@ public class WikiMapper {
 
   public static WikiEntry wikiEntryMapper(String berechtigung,
       List<Map<String, Object>> content, List<Map<String, Object>> filteredNavTopics,
-      List<Map<String, Object>> parentTopic, Type type,
+      List<Map<String, Object>> parentTopic, WikiType wikiType,
       List<Map<String, Object>> filteredNavContents) {
     int id = Integer.parseInt(content.get(0).get("id").toString());
     String topic = content.get(0).get("topic").toString();
@@ -21,13 +21,13 @@ public class WikiMapper {
     Right rights = RightMapper.rightMapper(berechtigung);
 
     return new WikiEntry(id, topic, htmlEntry, rights, wikiNavigationMapper(
-        filteredNavTopics, parentTopic, type, filteredNavContents));
+        filteredNavTopics, parentTopic, wikiType, filteredNavContents));
   }
 
   public static SubjectEntry subjectEntryMapper(int id, String berechtigung,
       List<Map<String, Object>> topics,
       List<Map<String, Object>> contents, List<Map<String, Object>> filteredNavTopics,
-      List<Map<String, Object>> parentTopic, Type type,
+      List<Map<String, Object>> parentTopic, WikiType wikiType,
       List<Map<String, Object>> filteredNavContents) {
 
     List<SubjectEntry> listedSubjectEntries = new ArrayList<>();
@@ -54,13 +54,13 @@ public class WikiMapper {
     } else {
       return new SubjectEntry(id, listedSubjectEntries, listedContentEntries, rights,
           wikiNavigationMapper(filteredNavTopics,
-              parentTopic, type, filteredNavContents));
+              parentTopic, wikiType, filteredNavContents));
     }
   }
 
   //Baut das Wiki-Navigations-Objekt zusammen.
   public static WikiNavigation wikiNavigationMapper(List<Map<String, Object>> filteredNavTopics,
-      List<Map<String, Object>> parentTopic, Type type,
+      List<Map<String, Object>> parentTopic, WikiType wikiType,
       List<Map<String, Object>> filteredNavContents) {
 
     List<SubjectEntry> listedSubjectEntries = new ArrayList<>();
@@ -73,7 +73,7 @@ public class WikiMapper {
       listedSubjectEntries.add(new SubjectEntry(subjectId, topic));
     }
     //Gibt das WikiNavigations-Objekt für Subjects zurück.
-    if (type == Type.THEMENBEREICH) {
+    if (wikiType == WikiType.THEMENBEREICH) {
 
       return new WikiNavigation(Integer.parseInt(parentTopic.get(0).get("id").toString()),
           parentTopic.get(0).get("topic").toString(),
@@ -81,7 +81,7 @@ public class WikiMapper {
     }
 
     //Baut die Liste der Content-Einträge (Entries) zusammen und gibt das WikiNavigations-Objekt für Entrys zurück.
-    else if (type == Type.STANDARDEINTRAG) {
+    else if (wikiType == WikiType.STANDARDEINTRAG) {
       List<WikiEntry> listedContentEntries = new ArrayList<>();
       for (Map<String, Object> content : filteredNavContents) {
         int subjectId = Integer.parseInt(content.get("id").toString());

@@ -2,7 +2,7 @@ package de.simpletactics.wiki.lib.adapter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import de.simpletactics.wiki.lib.model.Type;
+import de.simpletactics.wiki.lib.model.WikiType;
 import de.simpletactics.wiki.lib.service.port.WikiEntryPort;
 import de.simpletactics.wiki.lib.service.port.WikiPort;
 import de.simpletactics.wiki.lib.service.port.WikiRightsPort;
@@ -33,7 +33,7 @@ public class WikiAdapter implements WikiPort {
   public String getTopicsAsJson(int id, String username) {
 
     if (!wikiRightsPort.getWikiBerechtigung(username, id).equals("none")) {
-      if (id == 0 || getType(id) == Type.THEMENBEREICH) {
+      if (id == 0 || getWikiType(id) == WikiType.THEMENBEREICH) {
 
         List<Map<String, Object>> filteredTopics = getFilteredTopics(id, username);
         List<Map<String, Object>> filteredContents = getFilteredContents(id, username);
@@ -43,21 +43,21 @@ public class WikiAdapter implements WikiPort {
               .toJson(WikiMapper.subjectEntryMapper(id,
                   wikiRightsPort.getWikiBerechtigung(username, id), filteredTopics,
                   filteredContents, List.of(), wikiEntryPort.getTopic(id),
-                  getType(id), List.of()));
+                  getWikiType(id), List.of()));
         } else {
           return gson
               .toJson(WikiMapper.subjectEntryMapper(id,
                   wikiRightsPort.getWikiBerechtigung(username, id), filteredTopics,
                   filteredContents, getFilteredNavTopics(id, username), wikiEntryPort.getTopic(id),
-                  getType(id), getFilteredNavContents(id, username)));
+                  getWikiType(id), getFilteredNavContents(id, username)));
         }
 
 
-      } else if (getType(id) == Type.STANDARDEINTRAG) {
+      } else if (getWikiType(id) == WikiType.STANDARDEINTRAG) {
         List<Map<String, Object>> content = wikiEntryPort.getContent(id);
         return gson.toJson(
             WikiMapper.wikiEntryMapper(wikiRightsPort.getWikiBerechtigung(username, id), content,
-                getFilteredNavTopics(id, username), wikiEntryPort.getTopic(id), getType(id),
+                getFilteredNavTopics(id, username), wikiEntryPort.getTopic(id), getWikiType(id),
                 getFilteredNavContents(id, username)));
       }
     }
@@ -68,7 +68,7 @@ public class WikiAdapter implements WikiPort {
   public <T> T getTopicsAsObject(int id, String username) {
 
     if (!wikiRightsPort.getWikiBerechtigung(username, id).equals("none")) {
-      if (id == 0 || getType(id) == Type.THEMENBEREICH) {
+      if (id == 0 || getWikiType(id) == WikiType.THEMENBEREICH) {
 
         List<Map<String, Object>> filteredTopics = getFilteredTopics(id, username);
         List<Map<String, Object>> filteredContents = getFilteredContents(id, username);
@@ -76,13 +76,13 @@ public class WikiAdapter implements WikiPort {
         return (T) WikiMapper.subjectEntryMapper(id,
             wikiRightsPort.getWikiBerechtigung(username, id), filteredTopics,
             filteredContents, getFilteredNavTopics(id, username), wikiEntryPort.getTopic(id),
-            getType(id), getFilteredNavContents(id, username));
+            getWikiType(id), getFilteredNavContents(id, username));
 
-      } else if (getType(id) == Type.STANDARDEINTRAG) {
+      } else if (getWikiType(id) == WikiType.STANDARDEINTRAG) {
         List<Map<String, Object>> content = wikiEntryPort.getContent(id);
         return (T) WikiMapper.wikiEntryMapper(wikiRightsPort.getWikiBerechtigung(username, id),
             content,
-            getFilteredNavTopics(id, username), wikiEntryPort.getTopic(id), getType(id),
+            getFilteredNavTopics(id, username), wikiEntryPort.getTopic(id), getWikiType(id),
             getFilteredNavContents(id, username));
       }
     }
@@ -119,6 +119,21 @@ public class WikiAdapter implements WikiPort {
 
   public void deleteEntry(int id) {
     wikiEntryPort.deleteContent(id);
+  }
+
+  public WikiType getWikiType(int id) {
+    List<Map<String, Object>> type = wikiEntryPort.getContent(id);
+    switch (Integer.parseInt(type.get(0).get("type").toString())) {
+      case 1:
+        return WikiType.THEMENBEREICH;
+      case 2:
+        return WikiType.STANDARDEINTRAG;
+      case 3:
+        return WikiType.POLL;
+      default:
+        return null;
+    }
+
   }
 
   private List<Map<String, Object>> getFilteredTopics(int id, String username) {
@@ -200,20 +215,6 @@ public class WikiAdapter implements WikiPort {
     }
 
     return contents;
-  }
-
-
-  private Type getType(int id) {
-    List<Map<String, Object>> type = wikiEntryPort.getContent(id);
-    switch (Integer.parseInt(type.get(0).get("type").toString())) {
-      case 1:
-        return Type.THEMENBEREICH;
-      case 2:
-        return Type.STANDARDEINTRAG;
-      default:
-        return null;
-    }
-
   }
 
 }
