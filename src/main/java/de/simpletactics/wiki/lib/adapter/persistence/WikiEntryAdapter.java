@@ -37,7 +37,7 @@ public class WikiEntryAdapter implements WikiEntryPort {
     List<Map<String, Object>> contents;
     String sql =
         "SELECT w.id, w.topic, w.content, w.type FROM wiki AS w INNER JOIN wiki_link AS wl ON w.id = wl.subid WHERE wl.topid = '"
-            + id + "' AND w.type = '2' ORDER BY wl.order;";
+            + id + "' AND (w.type = '2' OR w.type = '3') ORDER BY wl.order;";
     contents = jdbc.queryForList(sql);
 
     return contents;

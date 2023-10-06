@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public class WikiEntry {
 
-  private final WikiType wikiType = WikiType.STANDARDEINTRAG;
+  private WikiType wikiType;
   private int id;
   private String topic;
   private String htmlEntry;
@@ -15,8 +15,9 @@ public class WikiEntry {
   private WikiNavigation wikiNavigation;
 
 
-  public WikiEntry(int id, String topic) {
+  public WikiEntry(int id, String topic, WikiType wikiType) {
     this.id = id;
     this.topic = topic;
+    this.wikiType = wikiType;
   }
 }

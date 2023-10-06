@@ -97,8 +97,8 @@ public class WikiAdapter implements WikiPort {
     wikiEntryPort.updateTopic(topic, id);
   }
 
-  public int addEntry(String topic, String content, String threadId) {
-    int newId = wikiEntryPort.newId("2");
+  public int addEntry(String topic, String content, String threadId, WikiType wikiType) {
+    int newId = wikiEntryPort.newId(wikiType == WikiType.STANDARDEINTRAG ? "2" : "3");
     wikiEntryPort.linkIds(Integer.parseInt(threadId), newId);
     wikiEntryPort.updateContent(topic, content, newId);
     wikiRightsPort.setWikiRightsCopyOvertopic(newId, Integer.parseInt(threadId));

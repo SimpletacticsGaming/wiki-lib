@@ -20,7 +20,7 @@ public class WikiMapper {
     String htmlEntry = content.get(0).get("content").toString();
     Right rights = RightMapper.rightMapper(berechtigung);
 
-    return new WikiEntry(id, topic, htmlEntry, rights, wikiNavigationMapper(
+    return new WikiEntry(WikiType.STANDARDEINTRAG, id, topic, htmlEntry, rights, wikiNavigationMapper(
         filteredNavTopics, parentTopic, wikiType, filteredNavContents));
   }
 
@@ -43,8 +43,10 @@ public class WikiMapper {
     for (Map<String, Object> entry : contents) {
       int entryId = Integer.parseInt(entry.get("id").toString());
       String topic = entry.get("topic").toString();
+      WikiType wikiTypeOfContent = entry.get("type").toString().equals("2") ? WikiType.STANDARDEINTRAG
+          : WikiType.POLL;
 
-      listedContentEntries.add(new WikiEntry(entryId, topic));
+      listedContentEntries.add(new WikiEntry(entryId, topic, wikiTypeOfContent));
     }
     Right rights = RightMapper.rightMapper(berechtigung);
 
@@ -81,13 +83,13 @@ public class WikiMapper {
     }
 
     //Baut die Liste der Content-Einträge (Entries) zusammen und gibt das WikiNavigations-Objekt für Entrys zurück.
-    else if (wikiType == WikiType.STANDARDEINTRAG) {
+    else if (wikiType == WikiType.STANDARDEINTRAG || wikiType == WikiType.POLL) {
       List<WikiEntry> listedContentEntries = new ArrayList<>();
       for (Map<String, Object> content : filteredNavContents) {
         int subjectId = Integer.parseInt(content.get("id").toString());
         String topic = content.get("topic").toString();
 
-        listedContentEntries.add(new WikiEntry(subjectId, topic));
+        listedContentEntries.add(new WikiEntry(subjectId, topic, wikiType));
       }
       return new WikiNavigation(Integer.parseInt(parentTopic.get(0).get("id").toString()),
           parentTopic.get(0).get("topic").toString(),
