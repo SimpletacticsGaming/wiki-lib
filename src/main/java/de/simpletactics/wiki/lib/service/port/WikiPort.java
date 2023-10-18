@@ -12,7 +12,7 @@ public interface WikiPort {
 
   void updateTopic(String topic, int id);
 
-  int addEntry(String topic, String content, String threadId);
+  int addEntry(String topic, String content, String threadId, WikiType wikiType);
 
   int addTopic(String id, String topic);
 
