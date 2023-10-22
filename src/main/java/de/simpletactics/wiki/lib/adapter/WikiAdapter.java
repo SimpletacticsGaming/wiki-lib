@@ -53,7 +53,7 @@ public class WikiAdapter implements WikiPort {
         }
 
 
-      } else if (getWikiType(id) == WikiType.STANDARDEINTRAG) {
+      } else if (getWikiType(id) == WikiType.STANDARDEINTRAG || getWikiType(id) == WikiType.POLL) {
         List<Map<String, Object>> content = wikiEntryPort.getContent(id);
         return gson.toJson(
             WikiMapper.wikiEntryMapper(wikiRightsPort.getWikiBerechtigung(username, id), content,
