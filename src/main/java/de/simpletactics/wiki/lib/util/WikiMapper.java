@@ -88,14 +88,29 @@ public class WikiMapper {
       for (Map<String, Object> content : filteredNavContents) {
         int subjectId = Integer.parseInt(content.get("id").toString());
         String topic = content.get("topic").toString();
+       WikiType navWikiType = getWikiType(Integer.parseInt(content.get("type").toString()));
 
-        listedContentEntries.add(new WikiEntry(subjectId, topic, wikiType));
+        listedContentEntries.add(new WikiEntry(subjectId, topic, navWikiType));
       }
       return new WikiNavigation(Integer.parseInt(parentTopic.get(0).get("id").toString()),
           parentTopic.get(0).get("topic").toString(),
           listedSubjectEntries, listedContentEntries);
     }
     return null;
+  }
+
+  public static WikiType getWikiType(int id) {
+    switch (id) {
+      case 1:
+        return WikiType.THEMENBEREICH;
+      case 2:
+        return WikiType.STANDARDEINTRAG;
+      case 3:
+        return WikiType.POLL;
+      default:
+        return null;
+    }
+
   }
 
 }
