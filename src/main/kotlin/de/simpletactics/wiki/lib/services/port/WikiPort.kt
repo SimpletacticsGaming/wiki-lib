@@ -1,5 +1,6 @@
 package de.simpletactics.wiki.lib.services.port
 
+import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.model.WikiType
 
@@ -11,6 +12,8 @@ interface WikiPort {
 
     fun updateTopic(topicEntity: TopicEntity): Int
 
-    fun updateTopic(id: Int, topic: String): Int
+    fun createEntry(entryEntity: EntryEntity): Int
+
+    fun updateEntry(entryEntity: EntryEntity): Int
 
 }
