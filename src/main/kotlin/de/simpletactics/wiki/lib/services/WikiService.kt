@@ -1,5 +1,6 @@
 package de.simpletactics.wiki.lib.services
 
+import de.simpletactics.wiki.lib.model.WikiType
 import de.simpletactics.wiki.lib.services.port.WikiPort
 import org.springframework.stereotype.Service
 
@@ -10,12 +11,14 @@ class WikiService(
 
     fun createTopic(topic: String): Int {
         // Add to Zentraltabelle (wiki) id + type
+        val id = wikiPort.addToWiki(WikiType.THEMENBEREICH)
         // Add to Themenbereich (wiki_topic) id + thema
-        return 0
+        return wikiPort.createTopic(id, topic)
     }
 
     fun updateTopic(id: Int, topic: String) {
-         // Update entry in wiki_topic
+        wikiPort.updateTopic(id, topic)
     }
+
 
 }
