@@ -1,10 +1,17 @@
 group = "de.simpletactics"
 version = "0.0.2"
+val javaVersion = "17"
 
 plugins {
 	java
 	`maven-publish`
 
+	// Kotlin
+	kotlin("jvm")
+	kotlin("plugin.spring")
+	kotlin("plugin.noarg")
+
+	id("org.jetbrains.kotlin.plugin.allopen")
 	id("org.springframework.boot")
 	id("com.gorylenko.gradle-git-properties")
 	id("com.github.ben-manes.versions")
@@ -18,8 +25,8 @@ repositories {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_11
-	targetCompatibility = JavaVersion.VERSION_11
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 
 	withSourcesJar()
 	withJavadocJar()
@@ -40,18 +47,30 @@ dependencies {
 
 }
 
-tasks.getByName<Jar>("jar") {
-	enabled = false
-}
-
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
-tasks.jar {
-	enabled = true
-	archiveClassifier.set("")
-	manifest.attributes["Main-Class"] = "de.simpletactics.wiki.lib.Application"
+tasks {
+	creating(Jar::class) {
+		manifest {
+			attributes["Main-Class"] = "de.simpletactics.wiki.lib.Main.kt"
+		}
+		from(sourceSets.main.get().output)
+		archiveFileName.set("sita-backend.jar")
+	}
+
+	compileKotlin {
+		kotlinOptions {
+			jvmTarget = javaVersion
+		}
+	}
+
+	compileTestKotlin {
+		kotlinOptions {
+			jvmTarget = javaVersion
+		}
+	}
 }
 
 tasks.wrapper {
@@ -62,6 +81,11 @@ tasks.wrapper {
 tasks.bootJar {
 	enabled = false
 	mainClass.set("de.simpletactics.Application")
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.register("bootRunLocal") {
