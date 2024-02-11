@@ -30,7 +30,7 @@ class WikiAdapter(
        val result = jdbc.queryForList("SELECT * FROM wiki_topic WHERE id = %d", id)
         return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("topic") && result.first().containsKey("child_ids")) {
             val entityAsMap = result.first()
-                TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString(), entityAsMap["child_ids"].toString().split(",").toList().map { it.toInt() })
+                TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString(), entityAsMap["child_ids"].toString().split(",").map { it.toInt() }.toMutableList())
         } else {
             null
         }
@@ -41,7 +41,7 @@ class WikiAdapter(
     }
 
     override fun updateTopic(topicEntity: TopicEntity): Int {
-        val effectedRows = jdbc.update("UPDATE wiki_topic SET topic = %s, child_ids = %s WHERE id = %d;", topicEntity.topic, topicEntity.child_ids, topicEntity.id)
+        val effectedRows = jdbc.update("UPDATE wiki_topic SET topic = %s, child_ids = %s WHERE id = %d;", topicEntity.topic, topicEntity.childIds, topicEntity.id)
         return if (effectedRows == 1) effectedRows else
             throw IllegalStateException("Update topic updated $effectedRows rows instead only 1 for id ${topicEntity.id}. Throw exception for rollback.")
     }
@@ -70,7 +70,7 @@ class WikiAdapter(
         val result = jdbc.queryForList("SELECT * FROM (SELECT id, topic, unnest(child_id) as child_id FROM wiki_topic) as topic WHERE child_id = %d", childId)
         return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("topic") && result.first().containsKey("child_id")) {
             val entityAsMap = result.first()
-            TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString(), entityAsMap["child_id"].toString().split(",").map { it.toInt() })
+            TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString(), entityAsMap["child_id"].toString().split(",").map { it.toInt() }.toMutableList())
         } else {
             null
         }
