@@ -4,21 +4,26 @@ import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.model.WikiType
 import de.simpletactics.wiki.lib.services.port.WikiPort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class WikiService(
     private val wikiPort: WikiPort,
 ) {
 
+    @Transactional
     fun createTopic(topic: String): Int {
-        // Add to Zentraltabelle (wiki) id + type
         val id = wikiPort.addToWiki(WikiType.THEMENBEREICH)
-        // Add to Themenbereich (wiki_topic) id + thema
-        return wikiPort.createTopic(TopicEntity(id, topic))
+        return wikiPort.createTopic(TopicEntity(id, topic, listOf()))
     }
 
+    @Transactional
     fun updateTopic(id: Int, topic: String) {
-        wikiPort.updateTopic(TopicEntity(id, topic))
+        val entity = wikiPort.getTopic(id)
+        if (entity != null) {
+            val updatedEntity = entity.copy(topic = topic)
+            wikiPort.updateTopic(updatedEntity)
+        }
     }
 
 
