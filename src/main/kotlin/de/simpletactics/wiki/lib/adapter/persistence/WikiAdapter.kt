@@ -47,7 +47,13 @@ class WikiAdapter(
     }
 
     override fun getEntry(id: Int): EntryEntity? {
-        TODO("Not yet implemented")
+        val result = jdbc.queryForList("SELECT * FROM wiki_entry WHERE id = %d", id)
+        return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("headline") && result.first().containsKey("body")) {
+            val entityAsMap = result.first()
+            EntryEntity(entityAsMap["id"].toString().toInt(), entityAsMap["headline"].toString(), entityAsMap["body"].toString())
+        } else {
+            null
+        }
     }
 
     override fun createEntry(entryEntity: EntryEntity): Int {
