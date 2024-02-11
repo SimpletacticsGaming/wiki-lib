@@ -27,7 +27,13 @@ class WikiAdapter(
     }
 
     override fun getTopic(id: Int): TopicEntity? {
-        TODO("Not yet implemented")
+       val result = jdbc.queryForList("SELECT * FROM wiki_topic WHERE id = %d", id)
+        return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("topic")) {
+            val entityAsMap = result.first()
+            TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString())
+        } else {
+            null
+        }
     }
 
     override fun createTopic(topicEntity: TopicEntity): Int {
