@@ -41,7 +41,7 @@ class WikiAdapter(
     }
 
     override fun updateTopic(topicEntity: TopicEntity): Int {
-        val effectedRows = jdbc.update("UPDATE wiki_topic SET topic = %s WHERE id = %d;", topicEntity.topic, topicEntity.id)
+        val effectedRows = jdbc.update("UPDATE wiki_topic SET topic = %s, child_ids = %s WHERE id = %d;", topicEntity.topic, topicEntity.child_ids, topicEntity.id)
         return if (effectedRows == 1) effectedRows else
             throw IllegalStateException("Update topic updated $effectedRows rows instead only 1 for id ${topicEntity.id}. Throw exception for rollback.")
     }
