@@ -28,9 +28,9 @@ class WikiAdapter(
 
     override fun getTopic(id: Int): TopicEntity? {
        val result = jdbc.queryForList("SELECT * FROM wiki_topic WHERE id = %d", id)
-        return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("topic")) {
+        return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("topic") && result.first().containsKey("child_ids")) {
             val entityAsMap = result.first()
-            TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString())
+                TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString(), entityAsMap["child_ids"].toString().split(",").toList().map { it.toInt() })
         } else {
             null
         }
@@ -64,5 +64,15 @@ class WikiAdapter(
         val effectedRows = jdbc.update("UPDATE wiki_entry SET headline = %s, body = %s WHERE id = %d;", entryEntity.headline, entryEntity.htmlEntry, entryEntity.id)
         return if (effectedRows == 1) effectedRows else
             throw IllegalStateException("Update entry updated $effectedRows rows instead only 1 for id ${entryEntity.id}. Throw exception for rollback.")
+    }
+
+    override fun getTopicForChild(childId: Int): TopicEntity? {
+        val result = jdbc.queryForList("SELECT * FROM (SELECT id, topic, unnest(child_id) as child_id FROM wiki_topic) as topic WHERE child_id = %d", childId)
+        return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("topic") && result.first().containsKey("child_id")) {
+            val entityAsMap = result.first()
+            TopicEntity(entityAsMap["id"].toString().toInt(), entityAsMap["topic"].toString(), entityAsMap["child_id"].toString().split(",").map { it.toInt() })
+        } else {
+            null
+        }
     }
 }
