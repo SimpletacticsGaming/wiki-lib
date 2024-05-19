@@ -1,8 +1,10 @@
 package de.simpletactics.wiki.lib.services.port
 
+import de.simpletactics.wiki.lib.model.Right
+
 interface WikiRightsPort {
 
-    fun getWikiBerechtigung(username: String, wikiId: Int): String?
+    fun getWikiBerechtigung(username: String, wikiId: Int): Right?
 
     fun deleteWikiDefaultRead(wikiId: Int)
 

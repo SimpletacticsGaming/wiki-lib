@@ -6,6 +6,7 @@ import de.simpletactics.wiki.lib.model.WikiType
 import de.simpletactics.wiki.lib.services.port.WikiPort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.jvm.Throws
 
 @Service
 class WikiService(
@@ -27,12 +28,13 @@ class WikiService(
     }
 
     @Transactional
+    @Throws(IllegalArgumentException::class)
     fun createEntry(topicId: Int, headline: String, body: String) {
         val id = wikiPort.addToWiki(WikiType.STANDARDEINTRAG)
         wikiPort.createEntry(EntryEntity(id, headline, body))
         val parent = wikiPort.getTopic(id)
         if (parent != null) {
-            val childIds = parent.childIds
+            val childIds = parent.childIds.toMutableList()
             childIds.add(id)
             wikiPort.updateTopic(parent.copy(childIds = childIds))
         } else {
