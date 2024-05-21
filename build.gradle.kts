@@ -1,6 +1,5 @@
 group = "de.simpletactics"
 version = "0.0.2"
-val javaVersion = "17"
 
 plugins {
 	java
@@ -73,13 +72,13 @@ tasks {
 
 	compileKotlin {
 		kotlinOptions {
-			jvmTarget = javaVersion
+			jvmTarget = JavaVersion.VERSION_17.toString()
 		}
 	}
 
 	compileTestKotlin {
 		kotlinOptions {
-			jvmTarget = javaVersion
+			jvmTarget = JavaVersion.VERSION_17.toString()
 		}
 	}
 }
