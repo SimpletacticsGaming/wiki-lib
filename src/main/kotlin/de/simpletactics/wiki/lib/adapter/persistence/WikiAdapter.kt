@@ -13,13 +13,13 @@ class WikiAdapter(
         private val jdbc: JdbcTemplate,
 ) : WikiPort {
     override fun getWikiType(id: Int): WikiType? {
-       val result = jdbc.queryForList("SELECT type FROM wiki WHERE id = %d", id)
-       return if (result.size == 1 && result.first().containsKey("type")) {
-           val typeAsString = result.first()["type"].toString()
-           WikiType.valueOf(typeAsString)
-       } else {
-           null
-       }
+        val result = jdbc.queryForList("SELECT type FROM wiki WHERE id = %d", id)
+        return if (result.size == 1 && result.first().containsKey("type")) {
+            val typeAsString = result.first()["type"].toString()
+            WikiType.valueOf(typeAsString)
+        } else {
+            null
+        }
     }
 
     override fun addToWiki(wikiType: WikiType): Int {
@@ -28,7 +28,7 @@ class WikiAdapter(
     }
 
     override fun getTopic(id: Int): TopicEntity? {
-       val result = jdbc.queryForList("SELECT * FROM wiki_topic WHERE id = %d", id)
+        val result = jdbc.queryForList("SELECT * FROM wiki_topic WHERE id = %d", id)
         return if (result.size == 1 && result.first().containsKey("id") && result.first().containsKey("topic") && result.first().containsKey("child_ids")) {
             val entityAsMap = result.first()
             TopicEntity(

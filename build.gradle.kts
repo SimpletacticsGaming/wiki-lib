@@ -38,13 +38,10 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	implementation("javax.annotation:javax.annotation-api:1.2-b01")
-	implementation("com.google.code.gson:gson:2.8.9")
+	implementation("javax.annotation:javax.annotation-api:1.3.2")
+	implementation("com.google.code.gson:gson:2.11.0")
 	implementation("org.apache.commons:commons-collections4:4.4")
-
 }
 
 tasks.withType<Test> {

@@ -4,7 +4,7 @@ import de.simpletactics.wiki.lib.model.Right
 
 interface WikiRightsPort {
 
-    fun getWikiBerechtigung(username: String, wikiId: Int): Right?
+    fun getWikiBerechtigung(username: String, wikiId: Int): Right
 
     fun deleteWikiDefaultRead(wikiId: Int)
 
