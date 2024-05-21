@@ -1,6 +1,6 @@
 group = "de.simpletactics"
 version = "0.0.2"
-val javaVersion = "21"
+val javaVersion = "17"
 
 plugins {
 	java
@@ -18,6 +18,7 @@ plugins {
 
 }
 
+apply(plugin = "org.springframework.boot")
 apply(plugin = "io.spring.dependency-management")
 
 repositories {
@@ -25,8 +26,8 @@ repositories {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 
 	withSourcesJar()
 	withJavadocJar()
@@ -81,8 +82,8 @@ tasks.bootJar {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.register("bootRunLocal") {
