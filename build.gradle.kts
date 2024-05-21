@@ -19,6 +19,20 @@ plugins {
 }
 
 apply(plugin = "io.spring.dependency-management")
+apply(plugin = "org.springframework.boot")
+
+buildscript {
+	repositories {
+		maven {
+			url = uri("https://plugins.gradle.org/m2/")
+		}
+	}
+	val springBootVersion: String by project
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+	}
+}
+
 
 repositories {
 	mavenCentral()
