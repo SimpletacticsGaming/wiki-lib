@@ -7,21 +7,18 @@ import org.springframework.data.relational.core.sql.In
 
 interface WikiPort {
 
-    fun getWikiType(id: Int): WikiType?
-
-    fun addToWiki(wikiType: WikiType): Int
-
     fun getTopic(id: Int): TopicEntity?
 
-    fun createTopic(topicEntity: TopicEntity): Int
+    fun createTopic(topic: String): Int
 
-    fun updateTopic(topicEntity: TopicEntity): Int
+    fun updateTopic(id: Int, topic: String): Int
 
     fun getEntry(id: Int): EntryEntity?
 
-    fun createEntry(entryEntity: EntryEntity): Int
+    fun createEntry(topicId: Int, headline: String, body: String): Int
 
-    fun updateEntry(entryEntity: EntryEntity): Int
+    fun updateEntry(id: Int, headline: String, body: String): Int
 
-    fun getTopicForChild(childId: Int): TopicEntity?
+    fun getWikiType(id: Int): WikiType?
+
 }
