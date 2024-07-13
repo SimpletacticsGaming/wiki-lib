@@ -60,7 +60,7 @@ jobs:
           distribution: 'adopt'
 
       - name: run tests
-        run: ./gradlew test
+        run: ./gradlew test -PnexusSnapshotUrl=${{ secrets.NEXUS_SNAPSHOT_URL }} -PnexusUrl=${{ secrets.NEXUS_URL }} -PnexusUser=${{ secrets.NEXUS_USER }} -PnexusPassword=${{ secrets.NEXUS_PASSWORD }}
 
   publish:
     needs: test
@@ -87,4 +87,4 @@ jobs:
           distribution: 'adopt'
 
       - name: publish repo
-        run: ./gradlew publish
+        run: ./gradlew publish -PnexusSnapshotUrl=${{ secrets.NEXUS_SNAPSHOT_URL }} -PnexusUrl=${{ secrets.NEXUS_URL }} -PnexusUser=${{ secrets.NEXUS_USER }} -PnexusPassword=${{ secrets.NEXUS_PASSWORD }}
