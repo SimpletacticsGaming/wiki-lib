@@ -18,11 +18,11 @@ repositories {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_11
-	targetCompatibility = JavaVersion.VERSION_11
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 
 	withSourcesJar()
-	withJavadocJar()
+	//withJavadocJar()
 }
 
 repositories {
@@ -75,6 +75,11 @@ tasks.register("bootRunLocal") {
 	finalizedBy("bootRun")
 }
 
+val nexusSnapshotUrl: String by project
+val nexusUrl: String by project
+val nexusUser: String by project
+val nexusPassword: String by project
+
 publishing {
 	publications {
 		create<MavenPublication>("maven") {
@@ -84,6 +89,18 @@ publishing {
 			from(components["java"])
 		}
 	}
+	repositories {
+		maven {
+			name = "nexus"
+			url = if (version.toString().contains("SNAPSHOT", true)) {
+				uri(nexusSnapshotUrl)
+			} else {
+				uri(nexusUrl)
+			}
+			credentials {
+				username = nexusUser
+				password = nexusPassword
+			}
+		}
+	}
 }
-
-
