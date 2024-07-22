@@ -1,9 +1,0 @@
-jdk:
-  - openjdk11
-before_install:
-  - sdk install java 11.0.3-tem
-  - sdk use java 11.0.3-tem
-#  - sdk install maven
-#  - mvn -v
-#install:
-#  - mvn install -Dmaven.javadoc.skip=true -DskipTests
