@@ -1,5 +1,6 @@
 group = "de.simpletactics"
 version = "0.0.2"
+val javaVersion = "21"
 
 plugins {
     java
@@ -37,61 +38,30 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("javax.annotation:javax.annotation-api:1.2-b01")
 	implementation("com.google.code.gson:gson:2.8.9")
 	implementation("org.apache.commons:commons-collections4:4.4")
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
 
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.testcontainers:testcontainers:1.19.1")
+	testImplementation("org.testcontainers:postgresql")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks {
-    creating(Jar::class) {
-        manifest {
-            attributes["Main-Class"] = "de.simpletactics.wiki.lib.Main.kt"
-        }
-        from(sourceSets.main.get().output)
-        exclude("**/application-secrets.*")
-        archiveFileName.set("sita-backend.jar")
-    }
-
-    compileKotlin {
-        kotlinOptions {
-            jvmTarget = javaVersion
-        }
-    }
-
-    compileTestKotlin {
-        kotlinOptions {
-            jvmTarget = javaVersion
-        }
-    }
+tasks.jar {
+	enabled = true
+	archiveClassifier.set("")
+	exclude("**/application-secrets.*")
+	manifest.attributes["Main-Class"] = "de.simpletactics.wiki.lib.Main.kt"
 }
 
 tasks.wrapper {
 	val versionGradle: String by project
 	gradleVersion = versionGradle
-}
-
-tasks.bootJar {
-	enabled = false
-	mainClass.set("de.simpletactics.Application")
-}
-
-tasks.register("bootRunLocal") {
-	group = "application"
-	description = "Runs the Spring Boot application with the local profile"
-	doFirst {
-		tasks.bootRun.configure {
-			systemProperty("spring.profiles.active", "local,secrets")
-		}
-	}
-	finalizedBy("bootRun")
 }
 
 val nexusSnapshotUrl: String by project
