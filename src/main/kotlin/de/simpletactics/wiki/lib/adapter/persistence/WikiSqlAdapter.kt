@@ -2,8 +2,11 @@ package de.simpletactics.wiki.lib.adapter.persistence
 
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
+import de.simpletactics.wiki.lib.adapter.persistence.mapper.EntryMapper
+import de.simpletactics.wiki.lib.adapter.persistence.mapper.TopicRowMapper
 import de.simpletactics.wiki.lib.model.WikiType
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.queryForObject
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.jdbc.support.KeyHolder
 import org.springframework.stereotype.Component
@@ -30,38 +33,31 @@ class WikiSqlAdapter(
 
         jdbc.update({ connection ->
             val ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-            ps.setString(1, wikiType.toString())
+            ps.setObject(1, wikiType, 1111)
             ps
         }, keyHolder)
-        return keyHolder.key?.toInt() ?: throw IllegalStateException("Failed to insert into wiki")
+        return keyHolder.keys?.get("id").toString().toInt()
     }
 
     fun getTopic(id: Int): TopicEntity? {
-        val result = jdbc.queryForList("SELECT * FROM wiki_topic WHERE id = %d", id)
-        return if (result.size == 1 && result.first().containsKey("id") && result.first()
-                .containsKey("topic") && result.first().containsKey("child_ids")
-        ) {
-            val entityAsMap = result.first()
-            TopicEntity(
-                entityAsMap["id"].toString().toInt(),
-                entityAsMap["topic"].toString(),
-                entityAsMap["child_ids"].toString().split(",").map { it.toInt() }.toList()
-            )
+        val result = jdbc.query("SELECT * FROM wiki_topic WHERE id = $id", TopicRowMapper())
+        return if (result.size == 1) {
+            result.first()
         } else {
             null
         }
     }
 
     fun createTopic(topicEntity: TopicEntity): Int {
-        return jdbc.update("INSERT INTO wiki_topic (id, topic) VALUES (%d, %s);", topicEntity.id, topicEntity.topic)
+        return jdbc.update("INSERT INTO wiki_topic (id, topic) VALUES (?, ?);", topicEntity.id, topicEntity.topic)
     }
 
     @Throws(IllegalStateException::class)
     fun updateTopic(topicEntity: TopicEntity): Int {
         val effectedRows = jdbc.update(
-            "UPDATE wiki_topic SET topic = %s, child_ids = %s WHERE id = %d;",
+            "UPDATE wiki_topic SET topic = ?, child_id = ? WHERE id = ?;",
             topicEntity.topic,
-            topicEntity.childIds,
+            topicEntity.childIds.toIntArray(),
             topicEntity.id
         )
         return if (effectedRows == 1) effectedRows else
@@ -69,22 +65,17 @@ class WikiSqlAdapter(
     }
 
     fun getEntry(id: Int): EntryEntity? {
-        val result = jdbc.queryForList("SELECT * FROM wiki_entry WHERE id = %d", id)
-        return if (result.size == 1 && result.first().containsKey("id") && result.first()
-                .containsKey("headline") && result.first().containsKey("body")
-        ) {
-            val entityAsMap = result.first()
-            EntryEntity(
-                entityAsMap["id"].toString().toInt(),
-                entityAsMap["headline"].toString(),
-                entityAsMap["body"].toString()
-            )
-        } else null
+        val result = jdbc.query("SELECT * FROM wiki_entry WHERE id = $id", EntryMapper())
+        return if (result.size == 1) {
+            result.first()
+        } else {
+            null
+        }
     }
 
     fun createEntry(entryEntity: EntryEntity): Int {
         return jdbc.update(
-            "INSERT INTO wiki_entry (id, headline, body) VALUES (%d, %s, %s);",
+            "INSERT INTO wiki_entry (id, headline, body) VALUES (?, ?, ?);",
             entryEntity.id,
             entryEntity.headline,
             entryEntity.htmlEntry
@@ -94,7 +85,7 @@ class WikiSqlAdapter(
     @Throws(IllegalStateException::class)
     fun updateEntry(entryEntity: EntryEntity): Int {
         val effectedRows = jdbc.update(
-            "UPDATE wiki_entry SET headline = %s, body = %s WHERE id = %d;",
+            "UPDATE wiki_entry SET headline = ?, body = ? WHERE id = ?;",
             entryEntity.headline,
             entryEntity.htmlEntry,
             entryEntity.id
@@ -104,19 +95,14 @@ class WikiSqlAdapter(
     }
 
     fun getTopicForChild(childId: Int): TopicEntity? {
-        val result = jdbc.queryForList(
-            "SELECT * FROM (SELECT id, topic, unnest(child_id) as child_id FROM wiki_topic) as topic WHERE child_id = %d",
-            childId
+        val result = jdbc.query(
+            "SELECT * FROM wiki_topic WHERE $childId = ANY(child_id)",
+            TopicRowMapper()
         )
-        return if (result.size == 1 && result.first().containsKey("id") && result.first()
-                .containsKey("topic") && result.first().containsKey("child_id")
-        ) {
-            val entityAsMap = result.first()
-            TopicEntity(
-                entityAsMap["id"].toString().toInt(),
-                entityAsMap["topic"].toString(),
-                entityAsMap["child_id"].toString().split(",").map { it.toInt() }.toList()
-            )
-        } else null
+        return if (result.size == 1) {
+            result.first()
+        } else {
+            null
+        }
     }
 }
