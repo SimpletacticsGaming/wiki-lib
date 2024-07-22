@@ -37,14 +37,16 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+	implementation("org.springframework.boot:spring-boot-starter")
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+	implementation("org.springframework.boot:spring-boot-autoconfigure:3.3.2")
 	implementation("javax.annotation:javax.annotation-api:1.2-b01")
 	implementation("com.google.code.gson:gson:2.8.9")
 	implementation("org.apache.commons:commons-collections4:4.4")
-	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+	implementation("org.postgresql:postgresql")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.testcontainers:testcontainers:1.19.1")
+	testImplementation("org.testcontainers:testcontainers:1.20.0")
 	testImplementation("org.testcontainers:postgresql")
 }
 

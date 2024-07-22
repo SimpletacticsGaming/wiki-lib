@@ -20,7 +20,7 @@ class WikiAdapter(
 
     @Transactional
     override fun createTopic(topic: String): Int {
-        val id = wikiSqlAdapter.addToWiki(WikiType.THEMENBEREICH)
+        val id = wikiSqlAdapter.addToWiki(WikiType.TOPIC)
         return wikiSqlAdapter.createTopic(TopicEntity(id, topic, mutableListOf()))
     }
 
@@ -42,7 +42,7 @@ class WikiAdapter(
     @Transactional
     @Throws(IllegalArgumentException::class)
     override fun createEntry(topicId: Int, headline: String, body: String): Int {
-        val id = wikiSqlAdapter.addToWiki(WikiType.STANDARDEINTRAG)
+        val id = wikiSqlAdapter.addToWiki(WikiType.ENTRY)
         wikiSqlAdapter.createEntry(EntryEntity(id, headline, body))
         val parent = wikiSqlAdapter.getTopic(id)
         return if (parent != null) {

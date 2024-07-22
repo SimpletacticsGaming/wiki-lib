@@ -1,7 +1,7 @@
 package de.simpletactics.wiki.lib.model
 
 data class SubjectEntry(
-    val wikiType: WikiType = WikiType.THEMENBEREICH,
+    val wikiType: WikiType = WikiType.TOPIC,
     val id: Int,
     val title: String,
     val subjectEntries: List<SubjectEntry>,

@@ -1,7 +1,9 @@
 package de.simpletactics.wiki.lib
 
 import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
 
+@SpringBootApplication
 class Main
 
 fun main(args: Array<String>) {

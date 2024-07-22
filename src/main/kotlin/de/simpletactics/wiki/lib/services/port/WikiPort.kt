@@ -3,7 +3,6 @@ package de.simpletactics.wiki.lib.services.port
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.model.WikiType
-import org.springframework.data.relational.core.sql.In
 
 interface WikiPort {
 

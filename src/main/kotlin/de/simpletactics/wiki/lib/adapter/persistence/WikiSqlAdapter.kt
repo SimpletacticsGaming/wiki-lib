@@ -15,7 +15,7 @@ class WikiSqlAdapter(
 ) {
 
     fun getWikiType(id: Int): WikiType? {
-        val result = jdbc.queryForList("SELECT type FROM wiki WHERE id = %d", id)
+        val result = jdbc.queryForList("SELECT type FROM wiki WHERE id = ?", id)
         return if (result.size == 1 && result.first().containsKey("type")) {
             val typeAsString = result.first()["type"].toString()
             WikiType.valueOf(typeAsString)
