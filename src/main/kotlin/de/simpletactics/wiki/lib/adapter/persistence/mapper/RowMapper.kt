@@ -27,3 +27,9 @@ class EntryMapper : RowMapper<EntryEntity> {
     }
 
 }
+
+class IdMapper : RowMapper<Int> {
+    override fun mapRow(rs: ResultSet, rowNum: Int): Int? {
+        return rs.getInt("id")
+    }
+}

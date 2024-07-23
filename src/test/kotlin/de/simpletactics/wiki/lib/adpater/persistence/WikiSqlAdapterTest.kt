@@ -47,8 +47,8 @@ class WikiSqlAdapterTest {
 
     @Test
     fun createTopicTest() {
-        val wikiId = wikiSqlAdapter.addToWiki(WikiType.TOPIC)
-        wikiSqlAdapter.createTopic(TopicEntity(wikiId, "New Topic 1", listOf()))
+        //val wikiId = wikiSqlAdapter.addToWiki(WikiType.TOPIC)
+        val wikiId = wikiSqlAdapter.createTopic(TopicEntity(0, "New Topic 1", listOf()))
         val wikiType = wikiSqlAdapter.getWikiType(wikiId)
         val newTopic = wikiSqlAdapter.getTopic(wikiId)
         assertThat(wikiType).isEqualTo(WikiType.TOPIC)

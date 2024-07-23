@@ -3,6 +3,7 @@ package de.simpletactics.wiki.lib.adapter.persistence
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.EntryMapper
+import de.simpletactics.wiki.lib.adapter.persistence.mapper.IdMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.TopicRowMapper
 import de.simpletactics.wiki.lib.model.WikiType
 import org.springframework.jdbc.core.JdbcTemplate
@@ -49,7 +50,7 @@ class WikiSqlAdapter(
     }
 
     fun createTopic(topicEntity: TopicEntity): Int {
-        return jdbc.update("INSERT INTO wiki_topic (id, topic) VALUES (?, ?);", topicEntity.id, topicEntity.topic)
+        return jdbc.query("INSERT INTO wiki_topic (topic) VALUES (?) RETURNING id;", IdMapper(), topicEntity.topic,).first()
     }
 
     @Throws(IllegalStateException::class)
