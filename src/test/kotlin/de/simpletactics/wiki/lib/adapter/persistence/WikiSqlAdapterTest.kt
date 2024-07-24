@@ -32,8 +32,8 @@ class WikiSqlAdapterTest {
 
     @Test
     fun getTopicTest() {
-        val topic = wikiSqlAdapter.getTopic(11)
-        assertThat(topic).isEqualTo(TopicEntity(11, "Thema 1", listOf(14)))
+        val topic = wikiSqlAdapter.getTopic(10)
+        assertThat(topic).isEqualTo(TopicEntity(10, "Thema 10", listOf(9)))
     }
 
     @Test
