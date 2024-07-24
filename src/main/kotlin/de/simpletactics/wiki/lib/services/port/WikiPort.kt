@@ -8,7 +8,7 @@ interface WikiPort {
 
     fun getTopic(id: Int): TopicEntity?
 
-    fun createTopic(topic: String): Int
+    fun createTopic(parentId: Int, topic: String): Int
 
     fun updateTopic(id: Int, topic: String): Int
 
