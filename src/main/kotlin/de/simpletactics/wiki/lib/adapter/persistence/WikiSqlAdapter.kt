@@ -25,7 +25,7 @@ class WikiSqlAdapter(
     }
 
     fun getTopic(id: Int): TopicEntity? {
-        val result = jdbc.query("SELECT * FROM wiki_topic WHERE id = $id", TopicRowMapper())
+        val result = jdbc.query("SELECT * FROM wiki_topic WHERE id = ?", TopicRowMapper(), id)
         return if (result.size == 1) {
             result.first()
         } else {
@@ -51,7 +51,7 @@ class WikiSqlAdapter(
     }
 
     fun getEntry(id: Int): EntryEntity? {
-        val result = jdbc.query("SELECT * FROM wiki_entry WHERE id = $id", EntryMapper())
+        val result = jdbc.query("SELECT * FROM wiki_entry WHERE id = ?", EntryMapper(), id)
         return if (result.size == 1) {
             result.first()
         } else {
@@ -82,8 +82,9 @@ class WikiSqlAdapter(
 
     fun getTopicForChild(childId: Int): TopicEntity? {
         val result = jdbc.query(
-            "SELECT * FROM wiki_topic WHERE $childId = ANY(child_id)",
-            TopicRowMapper()
+            "SELECT * FROM wiki_topic WHERE ? = ANY(child_id)",
+            TopicRowMapper(),
+            childId
         )
         return if (result.size == 1) {
             result.first()
