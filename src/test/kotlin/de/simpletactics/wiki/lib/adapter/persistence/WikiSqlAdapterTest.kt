@@ -1,8 +1,7 @@
-package de.simpletactics.wiki.lib.adpater.persistence
+package de.simpletactics.wiki.lib.adapter.persistence
 
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
-import de.simpletactics.wiki.lib.adapter.persistence.WikiSqlAdapter
 import de.simpletactics.wiki.lib.model.WikiType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
