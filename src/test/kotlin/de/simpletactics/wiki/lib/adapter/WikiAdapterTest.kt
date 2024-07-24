@@ -56,6 +56,25 @@ class WikiAdapterTest {
     }
 
     @Test
+    fun deleteTopicTest() {
+        val wikiId = 2
+        val parentId = 20
+        val topic = wikiAdapter.getTopic(wikiId)
+        wikiAdapter.deleteTopic(wikiId)
+        val deletedWikiType = wikiAdapter.getWikiType(wikiId)
+        val deletedTopic = wikiAdapter.getTopic(wikiId)
+        val parent = wikiAdapter.getTopic(parentId)
+        assertThat(parent).isEqualTo(TopicEntity(parentId, "Topic to delete 2", listOf(21)))
+        assertThat(deletedWikiType).isNull()
+        assertThat(deletedTopic).isNull()
+        assertThat(topic!!.childIds).hasSize(2)
+        topic.childIds.forEach {
+            val entry = wikiAdapter.getEntry(it)
+            assertThat(entry).isNull()
+        }
+    }
+
+    @Test
     fun getEntryTest() {
         val wikiType = wikiAdapter.getWikiType(14)
         val newEntry = wikiAdapter.getEntry(14)
@@ -82,5 +101,18 @@ class WikiAdapterTest {
         val updatedEntry = wikiAdapter.getEntry(wikiId)
         assertThat(wikiType).isEqualTo(WikiType.ENTRY)
         assertThat(updatedEntry).isEqualTo(EntryEntity(wikiId, "Updated Entry 1", "My html body"))
+    }
+
+    @Test
+    fun deleteEntryTest() {
+        val wikiId = 7
+        val parentId = 8
+        wikiAdapter.deleteEntry(wikiId)
+        val wikiType = wikiAdapter.getWikiType(wikiId)
+        val topic = wikiAdapter.getTopic(parentId)
+        val entry = wikiAdapter.getEntry(wikiId)
+        assertThat(wikiType).isNull()
+        assertThat(entry).isNull()
+        assertThat(topic).isEqualTo(TopicEntity(parentId, "Topic with child delete", listOf()))
     }
 }

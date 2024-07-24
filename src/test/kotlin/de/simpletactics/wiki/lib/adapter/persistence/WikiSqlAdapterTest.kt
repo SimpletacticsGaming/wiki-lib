@@ -54,6 +54,34 @@ class WikiSqlAdapterTest {
     }
 
     @Test
+    fun deleteTopic() {
+        val wikiId = 3
+        val wikiType = wikiSqlAdapter.getWikiType(wikiId)
+        val topic = wikiSqlAdapter.getTopic(wikiId)
+        wikiSqlAdapter.deleteTopic(wikiId)
+        val deletedWikiType = wikiSqlAdapter.getWikiType(wikiId)
+        val deletedTopic = wikiSqlAdapter.getTopic(wikiId)
+        assertThat(wikiType).isEqualTo(WikiType.TOPIC)
+        assertThat(topic).isEqualTo(TopicEntity(3, "Topic to delete 2", listOf()))
+        assertThat(deletedWikiType).isNull()
+        assertThat(deletedTopic).isNull()
+    }
+
+    @Test
+    fun deleteEntry() {
+        val wikiId = 18
+        val wikiType = wikiSqlAdapter.getWikiType(wikiId)
+        val entry = wikiSqlAdapter.getEntry(wikiId)
+        wikiSqlAdapter.deleteEntry(wikiId)
+        val deletedWikiType = wikiSqlAdapter.getWikiType(wikiId)
+        val deletedEntry = wikiSqlAdapter.getEntry(wikiId)
+        assertThat(wikiType).isEqualTo(WikiType.ENTRY)
+        assertThat(entry).isEqualTo(EntryEntity(18, "Eintrag to delete 2", "<p>Test</p>"))
+        assertThat(deletedWikiType).isNull()
+        assertThat(deletedEntry).isNull()
+    }
+
+    @Test
     fun getEntryTest() {
         val wikiType = wikiSqlAdapter.getWikiType(14)
         val newEntry = wikiSqlAdapter.getEntry(14)
