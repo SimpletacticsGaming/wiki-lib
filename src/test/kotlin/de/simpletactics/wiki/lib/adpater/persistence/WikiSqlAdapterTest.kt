@@ -5,7 +5,6 @@ import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.adapter.persistence.WikiSqlAdapter
 import de.simpletactics.wiki.lib.model.WikiType
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -33,13 +32,6 @@ class WikiSqlAdapterTest {
     }
 
     @Test
-    fun addToWiki() {
-        val wikiId = wikiSqlAdapter.addToWiki(WikiType.TOPIC)
-        val wikiType = wikiSqlAdapter.getWikiType(wikiId)
-        assertThat(wikiType).isEqualTo(WikiType.TOPIC)
-    }
-
-    @Test
     fun getTopicTest() {
         val topic = wikiSqlAdapter.getTopic(11)
         assertThat(topic).isEqualTo(TopicEntity(11, "Thema 1", listOf(14)))
@@ -47,8 +39,7 @@ class WikiSqlAdapterTest {
 
     @Test
     fun createTopicTest() {
-        //val wikiId = wikiSqlAdapter.addToWiki(WikiType.TOPIC)
-        val wikiId = wikiSqlAdapter.createTopic(TopicEntity(0, "New Topic 1", listOf()))
+        val wikiId = wikiSqlAdapter.createTopic(TopicEntity(null, "New Topic 1", listOf()))
         val wikiType = wikiSqlAdapter.getWikiType(wikiId)
         val newTopic = wikiSqlAdapter.getTopic(wikiId)
         assertThat(wikiType).isEqualTo(WikiType.TOPIC)
@@ -58,7 +49,7 @@ class WikiSqlAdapterTest {
     @Test
     fun updateTopicTest() {
         val wikiId = 12
-        wikiSqlAdapter.updateTopic(TopicEntity(wikiId,"Updated Topic 2", listOf(12)))
+        wikiSqlAdapter.updateTopic(TopicEntity(wikiId, "Updated Topic 2", listOf(12)))
         val updatedTopic = wikiSqlAdapter.getTopic(wikiId)
         assertThat(updatedTopic).isEqualTo(TopicEntity(wikiId, "Updated Topic 2", listOf(12)))
     }
@@ -72,10 +63,8 @@ class WikiSqlAdapterTest {
     }
 
     @Test
-    @Disabled
     fun createEntryTest() {
-        val wikiId = wikiSqlAdapter.addToWiki(WikiType.ENTRY)
-        wikiSqlAdapter.createEntry(EntryEntity(wikiId, "New Entry 1", "My html body"))
+        val wikiId = wikiSqlAdapter.createEntry(EntryEntity(null, "New Entry 1", "My html body"))
         val wikiType = wikiSqlAdapter.getWikiType(wikiId)
         val newEntry = wikiSqlAdapter.getEntry(wikiId)
         assertThat(wikiType).isEqualTo(WikiType.ENTRY)
@@ -84,7 +73,7 @@ class WikiSqlAdapterTest {
 
     @Test
     fun updateEntryTest() {
-        val wikiId = 24
+        val wikiId = 15
         wikiSqlAdapter.updateEntry(EntryEntity(wikiId, "Updated Entry 1", "My html body"))
         val wikiType = wikiSqlAdapter.getWikiType(wikiId)
         val updatedEntry = wikiSqlAdapter.getEntry(wikiId)

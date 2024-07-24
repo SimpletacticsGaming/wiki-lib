@@ -7,11 +7,7 @@ import de.simpletactics.wiki.lib.adapter.persistence.mapper.IdMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.TopicRowMapper
 import de.simpletactics.wiki.lib.model.WikiType
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.queryForObject
-import org.springframework.jdbc.support.GeneratedKeyHolder
-import org.springframework.jdbc.support.KeyHolder
 import org.springframework.stereotype.Component
-import java.sql.Statement
 
 @Component
 class WikiSqlAdapter(
@@ -28,18 +24,6 @@ class WikiSqlAdapter(
         }
     }
 
-    fun addToWiki(wikiType: WikiType): Int {
-        val sql = "INSERT INTO wiki (type) VALUES (?)"
-        val keyHolder: KeyHolder = GeneratedKeyHolder()
-
-        jdbc.update({ connection ->
-            val ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-            ps.setObject(1, wikiType, 1111)
-            ps
-        }, keyHolder)
-        return keyHolder.keys?.get("id").toString().toInt()
-    }
-
     fun getTopic(id: Int): TopicEntity? {
         val result = jdbc.query("SELECT * FROM wiki_topic WHERE id = $id", TopicRowMapper())
         return if (result.size == 1) {
@@ -50,7 +34,8 @@ class WikiSqlAdapter(
     }
 
     fun createTopic(topicEntity: TopicEntity): Int {
-        return jdbc.query("INSERT INTO wiki_topic (topic) VALUES (?) RETURNING id;", IdMapper(), topicEntity.topic,).first()
+        return jdbc.query("INSERT INTO wiki_topic (topic) VALUES (?) RETURNING id;", IdMapper(), topicEntity.topic)
+            .first()
     }
 
     @Throws(IllegalStateException::class)
@@ -75,12 +60,12 @@ class WikiSqlAdapter(
     }
 
     fun createEntry(entryEntity: EntryEntity): Int {
-        return jdbc.update(
-            "INSERT INTO wiki_entry (id, headline, body) VALUES (?, ?, ?);",
-            entryEntity.id,
+        return jdbc.query(
+            "INSERT INTO wiki_entry (headline, body) VALUES (?, ?) RETURNING id;",
+            IdMapper(),
             entryEntity.headline,
             entryEntity.htmlEntry
-        )
+        ).first()
     }
 
     @Throws(IllegalStateException::class)
