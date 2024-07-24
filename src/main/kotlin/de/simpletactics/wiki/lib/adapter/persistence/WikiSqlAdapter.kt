@@ -50,6 +50,10 @@ class WikiSqlAdapter(
             throw IllegalStateException("Update topic updated $effectedRows rows instead only 1 for id ${topicEntity.id}. Throw exception for rollback.")
     }
 
+    fun deleteTopic(id: Int) {
+        jdbc.update("DELETE FROM wiki_topic WHERE id = ?", id)
+    }
+
     fun getEntry(id: Int): EntryEntity? {
         val result = jdbc.query("SELECT * FROM wiki_entry WHERE id = ?", EntryMapper(), id)
         return if (result.size == 1) {
@@ -78,6 +82,10 @@ class WikiSqlAdapter(
         )
         return if (effectedRows == 1) effectedRows else
             throw IllegalStateException("Update entry updated $effectedRows rows instead only 1 for id ${entryEntity.id}. Throw exception for rollback.")
+    }
+
+    fun deleteEntry(id: Int) {
+        jdbc.update("DELETE FROM wiki_entry WHERE id = ?", id)
     }
 
     fun getTopicForChild(childId: Int): TopicEntity? {

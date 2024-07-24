@@ -52,6 +52,24 @@ class WikiAdapter(
         }
     }
 
+    @Transactional
+    override fun deleteTopic(id: Int) {
+        val wikiType = wikiSqlAdapter.getWikiType(id)
+        if (wikiType == WikiType.TOPIC) {
+            val topic = wikiSqlAdapter.getTopic(id)
+            if (topic != null) {
+                val parent = wikiSqlAdapter.getTopicForChild(id)
+                if (parent != null) {
+                    topic.childIds.forEach { wikiSqlAdapter.deleteEntry(it) }
+                    val childIds = parent.childIds.toMutableList()
+                    childIds.remove(id)
+                    wikiSqlAdapter.updateTopic(parent.copy(childIds = childIds))
+                    wikiSqlAdapter.deleteTopic(id)
+                }
+            }
+        }
+    }
+
     override fun getEntry(id: Int): EntryEntity? {
         return wikiSqlAdapter.getEntry(id)
     }
@@ -89,6 +107,20 @@ class WikiAdapter(
             }
         } else {
             throw IllegalArgumentException("No entry found to update with id $id")
+        }
+    }
+
+    @Transactional
+    override fun deleteEntry(id: Int) {
+        val wikiType = wikiSqlAdapter.getWikiType(id)
+        if (wikiType == WikiType.ENTRY) {
+            val parent = wikiSqlAdapter.getTopicForChild(id)
+            if (parent != null) {
+                val childIds = parent.childIds.toMutableList()
+                childIds.remove(id)
+                wikiSqlAdapter.updateTopic(parent.copy(childIds = childIds))
+                wikiSqlAdapter.deleteEntry(id)
+            }
         }
     }
 

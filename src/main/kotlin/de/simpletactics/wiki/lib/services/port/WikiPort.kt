@@ -12,11 +12,15 @@ interface WikiPort {
 
     fun updateTopic(id: Int, topic: String): Int
 
+    fun deleteTopic(id: Int)
+
     fun getEntry(id: Int): EntryEntity?
 
     fun createEntry(topicId: Int, headline: String, body: String): Int
 
     fun updateEntry(id: Int, headline: String, body: String): Int
+
+    fun deleteEntry(id: Int)
 
     fun getWikiType(id: Int): WikiType?
 
