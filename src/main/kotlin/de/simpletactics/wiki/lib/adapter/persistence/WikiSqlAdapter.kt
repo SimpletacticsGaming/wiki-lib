@@ -5,6 +5,7 @@ import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.EntryMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.IdMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.TopicRowMapper
+import de.simpletactics.wiki.lib.model.WikiException
 import de.simpletactics.wiki.lib.model.WikiType
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -38,7 +39,6 @@ class WikiSqlAdapter(
             .first()
     }
 
-    @Throws(IllegalStateException::class)
     fun updateTopic(topicEntity: TopicEntity): Int {
         val effectedRows = jdbc.update(
             "UPDATE wiki_topic SET topic = ?, child_id = ? WHERE id = ?;",
@@ -47,7 +47,7 @@ class WikiSqlAdapter(
             topicEntity.id
         )
         return if (effectedRows == 1) effectedRows else
-            throw IllegalStateException("Update topic updated $effectedRows rows instead only 1 for id ${topicEntity.id}. Throw exception for rollback.")
+            throw WikiException("Update topic updated $effectedRows rows instead only 1 for id ${topicEntity.id}. Throw exception for rollback.")
     }
 
     fun deleteTopic(id: Int) {
@@ -72,7 +72,6 @@ class WikiSqlAdapter(
         ).first()
     }
 
-    @Throws(IllegalStateException::class)
     fun updateEntry(entryEntity: EntryEntity): Int {
         val effectedRows = jdbc.update(
             "UPDATE wiki_entry SET headline = ?, body = ? WHERE id = ?;",
@@ -81,7 +80,7 @@ class WikiSqlAdapter(
             entryEntity.id
         )
         return if (effectedRows == 1) effectedRows else
-            throw IllegalStateException("Update entry updated $effectedRows rows instead only 1 for id ${entryEntity.id}. Throw exception for rollback.")
+            throw WikiException("Update entry updated $effectedRows rows instead 1 for id ${entryEntity.id}.")
     }
 
     fun deleteEntry(id: Int) {
