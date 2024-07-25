@@ -1,13 +1,20 @@
 group = "de.simpletactics"
-version = "0.0.2"
+version = "1.0.0-SNAPSHOT"
+val javaVersion = "21"
 
 plugins {
-	java
-	`maven-publish`
+    java
+    `maven-publish`
 
-	id("org.springframework.boot")
-	id("com.gorylenko.gradle-git-properties")
-	id("com.github.ben-manes.versions")
+    // Kotlin
+    kotlin("jvm")
+    kotlin("plugin.spring")
+    kotlin("plugin.noarg")
+
+    id("org.jetbrains.kotlin.plugin.allopen")
+    id("org.springframework.boot")
+    id("com.gorylenko.gradle-git-properties")
+    id("com.github.ben-manes.versions")
 
 }
 
@@ -30,49 +37,33 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("org.springframework.boot:spring-boot-starter")
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+	implementation("org.springframework.boot:spring-boot-autoconfigure:3.3.2")
 	implementation("javax.annotation:javax.annotation-api:1.2-b01")
 	implementation("com.google.code.gson:gson:2.8.9")
 	implementation("org.apache.commons:commons-collections4:4.4")
+	implementation("org.postgresql:postgresql")
 
-}
-
-tasks.getByName<Jar>("jar") {
-	enabled = false
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.testcontainers:testcontainers:1.20.0")
+	testImplementation("org.testcontainers:postgresql")
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 tasks.jar {
 	enabled = true
 	archiveClassifier.set("")
-	manifest.attributes["Main-Class"] = "de.simpletactics.wiki.lib.Application"
+	exclude("**/application-secrets.*")
+	manifest.attributes["Main-Class"] = "de.simpletactics.wiki.lib.Main.kt"
 }
 
 tasks.wrapper {
 	val versionGradle: String by project
 	gradleVersion = versionGradle
-}
-
-tasks.bootJar {
-	enabled = false
-	mainClass.set("de.simpletactics.Application")
-}
-
-tasks.register("bootRunLocal") {
-	group = "application"
-	description = "Runs the Spring Boot application with the local profile"
-	doFirst {
-		tasks.bootRun.configure {
-			systemProperty("spring.profiles.active", "local,secrets")
-		}
-	}
-	finalizedBy("bootRun")
 }
 
 val nexusSnapshotUrl: String by project
