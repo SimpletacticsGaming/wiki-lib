@@ -2,9 +2,11 @@ package de.simpletactics.wiki.lib.adapter
 
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
+import de.simpletactics.wiki.lib.model.WikiException
 import de.simpletactics.wiki.lib.model.WikiType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
@@ -114,5 +116,35 @@ class WikiAdapterTest {
         assertThat(wikiType).isNull()
         assertThat(entry).isNull()
         assertThat(topic).isEqualTo(TopicEntity(parentId, "Topic with child delete", listOf()))
+    }
+
+    @Test
+    fun deleteEntryWithWrongIdException() {
+        val topicId = 11
+        assertThrows<WikiException>("No entry found to delete with id $topicId") {
+            wikiAdapter.deleteEntry(topicId)
+        }
+    }
+
+    @Test
+    fun deleteTopicWithWrongIdException() {
+        val entry = 19
+        assertThrows<WikiException>("No topic found to delete with id $entry") {
+            wikiAdapter.deleteTopic(entry)
+        }
+    }
+
+    @Test
+    fun updateEntryWithException() {
+        assertThrows<WikiException>("No entry found to update with id 999") {
+            wikiAdapter.updateEntry(999, "Updated Entry 1", "My html body")
+        }
+    }
+
+    @Test
+    fun updateTopicWithException() {
+        assertThrows<WikiException>("No topic found to update with id 999") {
+            wikiAdapter.updateTopic(999, "Updated Topic 2")
+        }
     }
 }
