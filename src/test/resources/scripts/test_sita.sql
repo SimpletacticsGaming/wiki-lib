@@ -68,6 +68,7 @@ ALTER TABLE ONLY wiki_topic ALTER COLUMN type SET DEFAULT 'TOPIC'::wiki_type;
 
 INSERT INTO wiki_topic(id, topic, child_id) VALUES (0, 'Startseite', ARRAY[11, 12, 13]);
 INSERT INTO wiki_topic(id, topic, child_id) VALUES (11, 'Thema 1', ARRAY[14]);
+INSERT INTO wiki_topic(id, topic) VALUES (24, 'Thema for poll');
 INSERT INTO wiki_topic(id, topic) VALUES (12, 'Thema 2');
 INSERT INTO wiki_topic(id, topic) VALUES (9, 'Thema 9');
 INSERT INTO wiki_topic(id, topic, child_id) VALUES (10, 'Thema 10', ARRAY[9]);

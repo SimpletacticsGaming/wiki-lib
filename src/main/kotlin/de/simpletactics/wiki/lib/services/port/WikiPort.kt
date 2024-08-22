@@ -6,22 +6,22 @@ import de.simpletactics.wiki.lib.model.WikiType
 
 interface WikiPort {
 
-    fun getTopic(id: Int): TopicEntity?
+    fun getTopic(id: Int, hasAccess: () -> Boolean): TopicEntity?
 
-    fun createTopic(parentId: Int, topic: String): Int
+    fun createTopic(parentId: Int, topic: String, hasAccess: () -> Boolean): Int
 
-    fun updateTopic(id: Int, topic: String): Int
+    fun updateTopic(id: Int, topic: String, hasAccess: () -> Boolean): Int
 
-    fun deleteTopic(id: Int)
+    fun deleteTopic(id: Int, hasAccess: () -> Boolean)
 
-    fun getEntry(id: Int): EntryEntity?
+    fun getEntry(id: Int, hasAccess: () -> Boolean): EntryEntity?
 
-    fun createEntry(topicId: Int, headline: String, body: String): Int
+    fun createEntry(topicId: Int, headline: String, body: String, hasAccess: () -> Boolean): Int
 
-    fun updateEntry(id: Int, headline: String, body: String): Int
+    fun updateEntry(id: Int, headline: String, body: String, hasAccess: () -> Boolean): Int
 
-    fun deleteEntry(id: Int)
+    fun deleteEntry(id: Int, hasAccess: () -> Boolean)
 
-    fun getWikiType(id: Int): WikiType?
+    fun getWikiType(id: Int, hasAccess: () -> Boolean): WikiType?
 
 }

@@ -5,7 +5,7 @@ import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.EntryMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.IdMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.TopicRowMapper
-import de.simpletactics.wiki.lib.model.WikiException
+import de.simpletactics.wiki.lib.model.WikiNotFoundException
 import de.simpletactics.wiki.lib.model.WikiType
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -47,7 +47,7 @@ class WikiSqlAdapter(
             topicEntity.id
         )
         return if (effectedRows == 1) effectedRows else
-            throw WikiException("Update topic updated $effectedRows rows instead only 1 for id ${topicEntity.id}. Throw exception for rollback.")
+            throw WikiNotFoundException("Update topic updated $effectedRows rows instead only 1 for id ${topicEntity.id}. Throw exception for rollback.")
     }
 
     fun deleteTopic(id: Int) {
@@ -80,7 +80,7 @@ class WikiSqlAdapter(
             entryEntity.id
         )
         return if (effectedRows == 1) effectedRows else
-            throw WikiException("Update entry updated $effectedRows rows instead 1 for id ${entryEntity.id}.")
+            throw WikiNotFoundException("Update entry updated $effectedRows rows instead 1 for id ${entryEntity.id}.")
     }
 
     fun deleteEntry(id: Int) {
