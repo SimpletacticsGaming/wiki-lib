@@ -3,18 +3,19 @@ package de.simpletactics.wiki.lib.adapter.persistence
 import de.simpletactics.model.poll.PollOption
 import de.simpletactics.model.poll.PollVoteEnum
 import de.simpletactics.model.poll.Vote
+import de.simpletactics.wiki.lib.adapter.FunSpecIT
 import de.simpletactics.wiki.lib.adapter.dto.poll.Date
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollModel
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.toEntity
 import de.simpletactics.wiki.lib.services.port.PollPort
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 
@@ -22,8 +23,9 @@ import java.time.LocalDateTime
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("testing")
 class SavePollAdapterTest(
-    val pollPort: PollPort
-) : FunSpec({
+    val pollPort: PollPort,
+    jdbcTemplate: JdbcTemplate,
+) : FunSpecIT(jdbcTemplate, {
 
     val mockedNotPresentPollId = 7
     val mockedPresentDatabasePollId = 5
@@ -80,8 +82,8 @@ class SavePollAdapterTest(
     context("Get and save Poll information") {
 
         test("processPoll") {
-            val generatedId = pollPort.savePoll(24, pollModel.toEntity())
-            val poll = pollPort.getPoll(generatedId)
+            val generatedId = pollPort.savePoll(24, pollModel.toEntity()) { true }
+            val poll = pollPort.getPoll(generatedId) { true }
             poll shouldNotBe null
             poll!!.id shouldBe generatedId
             poll.question shouldBe "This is a test"
@@ -100,14 +102,14 @@ class SavePollAdapterTest(
         }
 
         test("get present poll") {
-            val entity = pollPort.getPoll(mockedPresentDatabasePollId)
+            val entity = pollPort.getPoll(mockedPresentDatabasePollId) { true }
             entity shouldNotBe null
             requireNotNull(entity)
             entity shouldBeEqualToComparingFields mockedInDatabasePollModel.toEntity()
         }
 
         test("get not present poll") {
-            val entity = pollPort.getPoll(mockedNotPresentPollId)
+            val entity = pollPort.getPoll(mockedNotPresentPollId) { true }
             entity shouldBe null
         }
     }

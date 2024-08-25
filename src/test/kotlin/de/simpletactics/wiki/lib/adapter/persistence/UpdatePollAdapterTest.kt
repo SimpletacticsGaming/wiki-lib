@@ -3,17 +3,18 @@ package de.simpletactics.wiki.lib.adapter.persistence
 import de.simpletactics.model.poll.PollOption
 import de.simpletactics.model.poll.PollVoteEnum
 import de.simpletactics.model.poll.Vote
+import de.simpletactics.wiki.lib.adapter.FunSpecIT
 import de.simpletactics.wiki.lib.adapter.dto.poll.Date
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollModel
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.toEntity
 import de.simpletactics.wiki.lib.services.port.PollPort
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldNotBe
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import java.util.*
 
@@ -22,8 +23,9 @@ import java.util.*
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("testing")
 class UpdatePollAdapterTest(
-    val pollPort: PollPort
-) : FunSpec({
+    val pollPort: PollPort,
+    jdbcTemplate: JdbcTemplate,
+) : FunSpecIT(jdbcTemplate, {
 
     var generatedId: Int? = null
     val pollModel = PollModel(
@@ -49,12 +51,12 @@ class UpdatePollAdapterTest(
     context("Update polls") {
 
         beforeEach {
-            generatedId = pollPort.savePoll(24, pollModel.toEntity())
+            generatedId = pollPort.savePoll(24, pollModel.toEntity()) { true }
         }
 
         afterEach {
             if (generatedId != null) {
-                pollPort.deletePoll(generatedId!!)
+                pollPort.deletePoll(generatedId!!) { true }
             }
         }
 
@@ -63,7 +65,7 @@ class UpdatePollAdapterTest(
             val updatedDescription = "Updated description"
             val updatedPoll = pollModel.copy(generatedId, updatedQuestion, updatedDescription)
 
-            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity())
+            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
             fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
@@ -74,7 +76,7 @@ class UpdatePollAdapterTest(
             val sqlDate = Date.getDate()
             val updatedPoll = pollModel.copy(generatedId, date = sqlDate)
 
-            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity())
+            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
             fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
@@ -84,7 +86,7 @@ class UpdatePollAdapterTest(
         test("test update date set null") {
             val updatedPoll = pollModel.copy(generatedId, date = null)
 
-            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity())
+            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
             fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
@@ -93,10 +95,15 @@ class UpdatePollAdapterTest(
 
         test("test update poll entries with insert") {
             val pollEntries = pollModel.pollEntries.toMutableList()
-            pollEntries.add(PollEntryEntity(PollOption(UUID.randomUUID().toString(), "New Option"), mutableListOf()))
+            pollEntries.add(
+                PollEntryEntity(
+                    PollOption(UUID.randomUUID().toString(), "New Option"),
+                    mutableListOf()
+                )
+            )
             val updatedPoll = pollModel.copy(generatedId, pollEntries = pollEntries)
 
-            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity())
+            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
             fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
@@ -113,7 +120,7 @@ class UpdatePollAdapterTest(
                 }
             }
             val updatedPoll = pollModel.copy(generatedId, pollEntries = pollEntries)
-            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity())
+            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
             fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
@@ -124,7 +131,7 @@ class UpdatePollAdapterTest(
             val pollEntries = pollModel.pollEntries.toMutableList()
             pollEntries.removeFirst()
             val updatedPoll = pollModel.copy(generatedId, pollEntries = pollEntries)
-            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity())
+            val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
             fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)

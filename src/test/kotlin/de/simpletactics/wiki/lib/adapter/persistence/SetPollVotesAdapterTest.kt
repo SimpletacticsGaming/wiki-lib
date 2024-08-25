@@ -3,26 +3,28 @@ package de.simpletactics.wiki.lib.adapter.persistence
 import de.simpletactics.model.poll.PollOption
 import de.simpletactics.model.poll.PollVoteEnum
 import de.simpletactics.model.poll.Vote
+import de.simpletactics.wiki.lib.adapter.FunSpecIT
 import de.simpletactics.wiki.lib.adapter.dto.poll.Date
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollModel
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.toEntity
 import de.simpletactics.wiki.lib.services.port.PollPort
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("testing")
 class SetPollVotesAdapterTest(
-    val pollPort: PollPort
-) : FunSpec({
+    val pollPort: PollPort,
+    jdbcTemplate: JdbcTemplate,
+) : FunSpecIT(jdbcTemplate, {
 
     var generatedId: Int? = null
     val pollModel = PollModel(
@@ -46,24 +48,24 @@ class SetPollVotesAdapterTest(
     context("Get and save Poll information") {
 
         beforeEach {
-            generatedId = pollPort.savePoll(24, pollModel.toEntity())
+            generatedId = pollPort.savePoll(24, pollModel.toEntity()) { true }
         }
 
         afterEach {
             if (generatedId != null) {
-                pollPort.deletePoll(generatedId!!)
+                pollPort.deletePoll(generatedId!!) { true }
             }
         }
 
         test("set first poll votes test") {
-            val pollWithId = pollPort.getPoll(generatedId!!)
+            val pollWithId = pollPort.getPoll(generatedId!!) { true }
             pollWithId!!.pollEntries.forEach {
                 it.votes.add(Vote(1, Date.getDateAsString(), PollVoteEnum.TRUE))
             }
 
-            pollPort.setPollVotes(1, pollWithId)
+            pollPort.setPollVotes(1, pollWithId) { true }
 
-            val poll = pollPort.getPoll(generatedId!!)
+            val poll = pollPort.getPoll(generatedId!!) { true }
 
             poll shouldNotBe null
             poll!!.id shouldBe generatedId
@@ -93,19 +95,25 @@ class SetPollVotesAdapterTest(
         }
 
         test("should not override old votes which did not change test") {
-            val pollWithId = pollPort.getPoll(generatedId!!)
+            val pollWithId = pollPort.getPoll(generatedId!!) { true }
             val date = Date.getDateAsString()
             pollWithId!!.pollEntries.first {
                 it.votes.add(Vote(1, date, PollVoteEnum.TRUE))
             }
 
-            val modifiedPollId = pollPort.savePoll(24, pollWithId)
-            val modifiedPoll = pollPort.getPoll(modifiedPollId)
-            modifiedPoll!!.pollEntries[1].votes.add(Vote(1, Date.getDateAsString(), PollVoteEnum.FALSE))
+            val modifiedPollId = pollPort.savePoll(24, pollWithId) { true }
+            val modifiedPoll = pollPort.getPoll(modifiedPollId) { true }
+            modifiedPoll!!.pollEntries[1].votes.add(
+                Vote(
+                    1,
+                    Date.getDateAsString(),
+                    PollVoteEnum.FALSE
+                )
+            )
 
-            pollPort.setPollVotes(1, modifiedPoll)
+            pollPort.setPollVotes(1, modifiedPoll) { true }
 
-            val poll = pollPort.getPoll(modifiedPollId)
+            val poll = pollPort.getPoll(modifiedPollId) { true }
 
             poll shouldNotBe null
             poll!!.id shouldBe modifiedPollId
@@ -136,19 +144,31 @@ class SetPollVotesAdapterTest(
         }
 
         test("should not override other user votes") {
-            val pollWithId = pollPort.getPoll(generatedId!!)
+            val pollWithId = pollPort.getPoll(generatedId!!) { true }
             pollWithId!!.pollEntries.first {
                 it.votes.add(Vote(3, Date.getDateAsString(), PollVoteEnum.TRUE))
             }
 
-            val modifiedPollId = pollPort.savePoll(24, pollWithId)
-            val modifiedPoll = pollPort.getPoll(modifiedPollId)
-            modifiedPoll!!.pollEntries[0].votes.add(Vote(1, Date.getDateAsString(), PollVoteEnum.TRUE))
-            modifiedPoll.pollEntries[1].votes.add(Vote(1, Date.getDateAsString(), PollVoteEnum.TRUE))
+            val modifiedPollId = pollPort.savePoll(24, pollWithId) { true }
+            val modifiedPoll = pollPort.getPoll(modifiedPollId) { true }
+            modifiedPoll!!.pollEntries[0].votes.add(
+                Vote(
+                    1,
+                    Date.getDateAsString(),
+                    PollVoteEnum.TRUE
+                )
+            )
+            modifiedPoll.pollEntries[1].votes.add(
+                Vote(
+                    1,
+                    Date.getDateAsString(),
+                    PollVoteEnum.TRUE
+                )
+            )
 
-            pollPort.setPollVotes(1, modifiedPoll)
+            pollPort.setPollVotes(1, modifiedPoll) { true }
 
-            val poll = pollPort.getPoll(modifiedPollId)
+            val poll = pollPort.getPoll(modifiedPollId) { true }
 
             poll shouldNotBe null
             poll!!.id shouldBe modifiedPollId
@@ -185,13 +205,13 @@ class SetPollVotesAdapterTest(
         }
 
         test("should override own vote on change test") {
-            val pollWithId = pollPort.getPoll(generatedId!!)
+            val pollWithId = pollPort.getPoll(generatedId!!) { true }
             pollWithId!!.pollEntries.first {
                 it.votes.add(Vote(3, Date.getDateAsString(), PollVoteEnum.FALSE))
             }
 
-            val modifiedPollId = pollPort.savePoll(24, pollWithId)
-            val modifiedPoll = pollPort.getPoll(modifiedPollId)
+            val modifiedPollId = pollPort.savePoll(24, pollWithId) { true }
+            val modifiedPoll = pollPort.getPoll(modifiedPollId) { true }
             modifiedPoll!!.pollEntries.forEach {
                 it.votes.replaceAll {
                     Vote(
@@ -201,11 +221,17 @@ class SetPollVotesAdapterTest(
                     )
                 }
             }
-            modifiedPoll.pollEntries[1].votes.add(Vote(3, Date.getDateAsString(), PollVoteEnum.FALSE))
+            modifiedPoll.pollEntries[1].votes.add(
+                Vote(
+                    3,
+                    Date.getDateAsString(),
+                    PollVoteEnum.FALSE
+                )
+            )
 
-            pollPort.setPollVotes(3, modifiedPoll)
+            pollPort.setPollVotes(3, modifiedPoll) { true }
 
-            val poll = pollPort.getPoll(modifiedPollId)
+            val poll = pollPort.getPoll(modifiedPollId) { true }
 
             poll shouldNotBe null
             poll!!.id shouldBe modifiedPollId

@@ -4,147 +4,187 @@ import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.model.WikiNotFoundException
 import de.simpletactics.wiki.lib.model.WikiType
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.springframework.beans.factory.annotation.Autowired
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("testing")
-class WikiAdapterTest {
+class WikiAdapterTest(
+    private val wikiAdapter: WikiAdapter,
+    jdbcTemplate: JdbcTemplate,
+) : FunSpecIT(jdbcTemplate, {
 
-    @Autowired
-    private lateinit var wikiAdapter: WikiAdapter
+    context("wiki type") {
+        beforeTest {
+            executeSql("wiki_type.sql")
+        }
 
-    @Test
-    fun getWikiTypeTest() {
-        val wikiType = wikiAdapter.getWikiType(11)
-        assertThat(wikiType).isEqualTo(WikiType.TOPIC)
-    }
+        test("get") {
+            wikiAdapter.getWikiType(11) { true } shouldBe WikiType.TOPIC
+            wikiAdapter.getWikiType(14) { true } shouldBe WikiType.ENTRY
+            wikiAdapter.getWikiType(5) { true } shouldBe WikiType.POLL
+        }
 
-    @Test
-    fun getNoWikiTypeTest() {
-        val wikiType = wikiAdapter.getWikiType(999)
-        assertThat(wikiType).isNull()
-    }
-
-    @Test
-    fun getTopicTest() {
-        val topic = wikiAdapter.getTopic(13)
-        assertThat(topic).isEqualTo(TopicEntity(13, "Thema 3", listOf(5)))
-    }
-
-    @Test
-    fun createTopicTest() {
-        val wikiId = wikiAdapter.createTopic(4, "New Topic 1")
-        val wikiType = wikiAdapter.getWikiType(wikiId)
-        val parentTopic = wikiAdapter.getTopic(4)
-        val newTopic = wikiAdapter.getTopic(wikiId)
-        assertThat(wikiType).isEqualTo(WikiType.TOPIC)
-        assertThat(parentTopic).isEqualTo(TopicEntity(4, "Thema 4", listOf(15, wikiId)))
-        assertThat(newTopic).isEqualTo(TopicEntity(wikiId, "New Topic 1", listOf()))
-    }
-
-    @Test
-    fun updateTopicTest() {
-        val wikiId = 9
-        wikiAdapter.updateTopic(wikiId, "Updated Topic 2")
-        val updatedTopic = wikiAdapter.getTopic(wikiId)
-        assertThat(updatedTopic).isEqualTo(TopicEntity(wikiId, "Updated Topic 2", listOf()))
-    }
-
-    @Test
-    fun deleteTopicTest() {
-        val wikiId = 2
-        val parentId = 20
-        val topic = wikiAdapter.getTopic(wikiId)
-        wikiAdapter.deleteTopic(wikiId)
-        val deletedWikiType = wikiAdapter.getWikiType(wikiId)
-        val deletedTopic = wikiAdapter.getTopic(wikiId)
-        val parent = wikiAdapter.getTopic(parentId)
-        assertThat(parent).isEqualTo(TopicEntity(parentId, "Topic to delete 2", listOf(21)))
-        assertThat(deletedWikiType).isNull()
-        assertThat(deletedTopic).isNull()
-        assertThat(topic!!.childIds).hasSize(2)
-        topic.childIds.forEach {
-            val entry = wikiAdapter.getEntry(it)
-            assertThat(entry).isNull()
+        test("get no type") {
+            wikiAdapter.getWikiType(99) { true } shouldBe null
         }
     }
 
-    @Test
-    fun getEntryTest() {
-        val wikiType = wikiAdapter.getWikiType(14)
-        val newEntry = wikiAdapter.getEntry(14)
-        assertThat(wikiType).isEqualTo(WikiType.ENTRY)
-        assertThat(newEntry).isEqualTo(EntryEntity(14, "Eintrag 1", "<p>Test</p>"))
-    }
+    context("topic") {
 
-    @Test
-    fun createEntryTest() {
-        val wikiId = wikiAdapter.createEntry(11, "New Entry 1", "My html body")
-        val wikiType = wikiAdapter.getWikiType(wikiId)
-        val parent = wikiAdapter.getTopic(11)
-        val newEntry = wikiAdapter.getEntry(wikiId)
-        assertThat(wikiType).isEqualTo(WikiType.ENTRY)
-        assertThat(parent).isEqualTo(TopicEntity(11, "Thema 1", listOf(14, wikiId)))
-        assertThat(newEntry).isEqualTo(EntryEntity(wikiId, "New Entry 1", "My html body"))
-    }
+        beforeTest {
+            executeSql("wiki_topic.sql")
+        }
 
-    @Test
-    fun updateEntryTest() {
-        val wikiId = 15
-        wikiAdapter.updateEntry(wikiId, "Updated Entry 1", "My html body")
-        val wikiType = wikiAdapter.getWikiType(wikiId)
-        val updatedEntry = wikiAdapter.getEntry(wikiId)
-        assertThat(wikiType).isEqualTo(WikiType.ENTRY)
-        assertThat(updatedEntry).isEqualTo(EntryEntity(wikiId, "Updated Entry 1", "My html body"))
-    }
+        test("get") {
+            wikiAdapter.getTopic(13) { true } shouldBe TopicEntity(13, "Thema 3", listOf(5))
+            wikiAdapter.getTopic(99) { true } shouldBe null
+        }
 
-    @Test
-    fun deleteEntryTest() {
-        val wikiId = 7
-        val parentId = 8
-        wikiAdapter.deleteEntry(wikiId)
-        val wikiType = wikiAdapter.getWikiType(wikiId)
-        val topic = wikiAdapter.getTopic(parentId)
-        val entry = wikiAdapter.getEntry(wikiId)
-        assertThat(wikiType).isNull()
-        assertThat(entry).isNull()
-        assertThat(topic).isEqualTo(TopicEntity(parentId, "Topic with child delete", listOf()))
-    }
+        test("create") {
+            val wikiId = wikiAdapter.createTopic(4, "New Topic 1") { true }
 
-    @Test
-    fun deleteEntryWithWrongIdException() {
-        val topicId = 11
-        assertThrows<WikiNotFoundException>("No entry found to delete with id $topicId") {
-            wikiAdapter.deleteEntry(topicId)
+            wikiAdapter.getWikiType(wikiId) { true } shouldBe WikiType.TOPIC
+            wikiAdapter.getTopic(4) { true } shouldBe TopicEntity(
+                4,
+                "Thema 4",
+                listOf(15, wikiId)
+            )
+            wikiAdapter.getTopic(wikiId) { true } shouldBe TopicEntity(
+                wikiId,
+                "New Topic 1",
+                listOf()
+            )
+        }
+
+        test("update") {
+            val wikiId = 9
+            wikiAdapter.updateTopic(wikiId, "Updated Topic 2") { true }
+            wikiAdapter.getTopic(wikiId) { true } shouldBe TopicEntity(
+                wikiId,
+                "Updated Topic 2",
+                listOf()
+            )
+        }
+
+        test("delete") {
+            val wikiId = 2
+            val parentId = 20
+            val topic = wikiAdapter.getTopic(wikiId) { true }
+
+            wikiAdapter.deleteTopic(wikiId) { true }
+
+            wikiAdapter.getTopic(parentId) { true } shouldBe TopicEntity(
+                parentId,
+                "Topic to delete 2",
+                listOf(21)
+            )
+            wikiAdapter.getWikiType(wikiId) { true } shouldBe null
+            wikiAdapter.getTopic(wikiId) { true } shouldBe null
+
+            requireNotNull(topic)
+            with(topic) {
+                childIds shouldHaveSize 2
+                childIds.forEach { wikiAdapter.getEntry(it) { true } shouldBe null }
+            }
         }
     }
 
-    @Test
-    fun deleteTopicWithWrongIdException() {
-        val entry = 19
-        assertThrows<WikiNotFoundException>("No topic found to delete with id $entry") {
-            wikiAdapter.deleteTopic(entry)
+    context("entry") {
+
+        beforeTest {
+            executeSql("wiki_entry.sql")
+        }
+
+        test("get") {
+            wikiAdapter.getWikiType(14) { true } shouldBe WikiType.ENTRY
+            wikiAdapter.getEntry(14) { true } shouldBe EntryEntity(
+                14,
+                "Eintrag 1",
+                "<p>Test</p>"
+            )
+
+            wikiAdapter.getEntry(99) { true } shouldBe null
+        }
+
+        test("create") {
+            val wikiId = wikiAdapter.createEntry(11, "New Entry 1", "My html body") { true }
+            wikiAdapter.getWikiType(wikiId) { true } shouldBe WikiType.ENTRY
+            wikiAdapter.getTopic(11) { true } shouldBe TopicEntity(
+                11,
+                "Thema 1",
+                listOf(14, wikiId)
+            )
+            wikiAdapter.getEntry(wikiId) { true } shouldBe EntryEntity(
+                wikiId,
+                "New Entry 1",
+                "My html body"
+            )
+        }
+
+        test("update") {
+            val wikiId = 15
+            wikiAdapter.updateEntry(wikiId, "Updated Entry 1", "My html body") { true }
+            wikiAdapter.getWikiType(wikiId) { true } shouldBe WikiType.ENTRY
+            wikiAdapter.getEntry(wikiId) { true } shouldBe EntryEntity(
+                wikiId,
+                "Updated Entry 1",
+                "My html body"
+            )
+        }
+
+        test("delete") {
+            val wikiId = 7
+            val parentId = 8
+            wikiAdapter.deleteEntry(wikiId) { true }
+            wikiAdapter.getWikiType(wikiId) { true } shouldBe null
+            wikiAdapter.getTopic(parentId) { true } shouldBe TopicEntity(
+                parentId,
+                "Topic with child delete",
+                listOf()
+            )
+            wikiAdapter.getEntry(wikiId) { true } shouldBe null
         }
     }
 
-    @Test
-    fun updateEntryWithException() {
-        assertThrows<WikiNotFoundException>("No entry found to update with id 999") {
-            wikiAdapter.updateEntry(999, "Updated Entry 1", "My html body")
+    context("exception") {
+        beforeTest {
+            executeSql("wiki_exception.sql")
         }
-    }
 
-    @Test
-    fun updateTopicWithException() {
-        assertThrows<WikiNotFoundException>("No topic found to update with id 999") {
-            wikiAdapter.updateTopic(999, "Updated Topic 2")
+        test("delete entry with topic id") {
+            val topicId = 11
+            shouldThrow<WikiNotFoundException> {
+                wikiAdapter.deleteEntry(topicId) { true }
+            } shouldBe WikiNotFoundException("No entry found to delete with id $topicId")
         }
+
+        test("delete topic with wrong topic id") {
+            val topicId = 19
+            shouldThrow<WikiNotFoundException> {
+                wikiAdapter.deleteTopic(topicId) { true }
+            } shouldBe WikiNotFoundException("No topic found to delete with id $topicId")
+        }
+
+        test("update entry") {
+            val entryId = 999
+            shouldThrow<WikiNotFoundException> {
+                wikiAdapter.updateEntry(entryId, "Updated Entry 1", "My html body") { true }
+            } shouldBe WikiNotFoundException("No entry found to update with id $entryId")
+        }
+
+        test("update topic") {
+            val topicId = 999
+            shouldThrow<WikiNotFoundException> {
+                wikiAdapter.updateTopic(topicId, "Updated Topic 2") { true }
+            } shouldBe WikiNotFoundException("No topic found to update with id $topicId")
+        }
+
     }
-}
+})
