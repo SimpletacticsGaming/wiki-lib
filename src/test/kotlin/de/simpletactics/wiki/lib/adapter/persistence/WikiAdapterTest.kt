@@ -1,5 +1,7 @@
-package de.simpletactics.wiki.lib.adapter
+package de.simpletactics.wiki.lib.adapter.persistence
 
+import de.simpletactics.wiki.lib.adapter.FunSpecIT
+import de.simpletactics.wiki.lib.adapter.WikiAdapter
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.model.WikiNotFoundException
@@ -7,14 +9,8 @@ import de.simpletactics.wiki.lib.model.WikiType
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("testing")
 class WikiAdapterTest(
     private val wikiAdapter: WikiAdapter,
     jdbcTemplate: JdbcTemplate,

@@ -1,4 +1,4 @@
-package de.simpletactics.wiki.lib.adapter.persistence
+package de.simpletactics.wiki.lib.adapter.persistence.poll
 
 import de.simpletactics.model.poll.PollOption
 import de.simpletactics.model.poll.PollVoteEnum
@@ -13,21 +13,15 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 
-@SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("testing")
 class SavePollAdapterTest(
     val pollPort: PollPort,
     jdbcTemplate: JdbcTemplate,
 ) : FunSpecIT(jdbcTemplate, {
 
-    val mockedNotPresentPollId = 7
+    val mockedNotPresentPollId = 999
     val mockedPresentDatabasePollId = 5
 
     val pollModel = PollModel(
@@ -80,6 +74,10 @@ class SavePollAdapterTest(
 
 
     context("Get and save Poll information") {
+
+        beforeTest {
+            executeSql("wiki_poll.sql")
+        }
 
         test("processPoll") {
             val generatedId = pollPort.savePoll(24, pollModel.toEntity()) { true }
