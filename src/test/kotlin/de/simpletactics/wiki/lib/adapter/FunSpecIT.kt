@@ -1,9 +1,15 @@
 package de.simpletactics.wiki.lib.adapter
 
 import io.kotest.core.spec.style.FunSpec
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.test.context.ActiveProfiles
 
-open class FunSpecIT(
+@SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("testing")
+class FunSpecIT(
     private val jdbcTemplate: JdbcTemplate,
     body: FunSpecIT.() -> Unit = {}
 ) : FunSpec() {
@@ -13,10 +19,6 @@ open class FunSpecIT(
     }
 
     init {
-        beforeSpec {
-            executeSql("init.sql")
-        }
-
         afterTest {
             executeSql("clean_up.sql")
         }
