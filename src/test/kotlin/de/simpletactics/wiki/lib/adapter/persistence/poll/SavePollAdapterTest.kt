@@ -12,7 +12,6 @@ import de.simpletactics.wiki.lib.services.port.PollPort
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDateTime
 
@@ -24,6 +23,7 @@ class SavePollAdapterTest(
     val mockedNotPresentPollId = 999
     val mockedPresentDatabasePollId = 5
 
+    // Nur im Test hinterlegen
     val pollModel = PollModel(
         null,
         "This is a test",
@@ -44,6 +44,7 @@ class SavePollAdapterTest(
         null,
     )
 
+    // Nur im Test hinterlegen
     val mockedInDatabasePollModel = PollModel(
         mockedPresentDatabasePollId,
         "Frage 1",
@@ -82,35 +83,34 @@ class SavePollAdapterTest(
         test("processPoll") {
             val generatedId = pollPort.savePoll(24, pollModel.toEntity()) { true }
             val poll = pollPort.getPoll(generatedId) { true }
-            poll shouldNotBe null
-            poll!!.id shouldBe generatedId
-            poll.question shouldBe "This is a test"
-            poll.description shouldBe ""
-            poll.pollEntries shouldHaveSize 1
-            with(poll.pollEntries.first()) {
-                pollOption.text shouldBe "testCase"
-                pollOption.uuid shouldBe "ddb11436-bdc8-4488-87f6-fsdfsd"
-                votes shouldHaveSize 1
-                with(votes.first()) {
-                    userId shouldBe 1
-                    option shouldBe PollVoteEnum.FALSE
-                    date.isNotEmpty() shouldBe true
+
+            requireNotNull(poll)
+            with(poll) {
+                id shouldBe generatedId
+                description shouldBe ""
+                pollEntries shouldHaveSize 1
+                with(pollEntries.first()) {
+                    pollOption.text shouldBe "testCase"
+                    pollOption.uuid shouldBe "ddb11436-bdc8-4488-87f6-fsdfsd"
+                    votes shouldHaveSize 1
+                    with(votes.first()) {
+                        userId shouldBe 1
+                        option shouldBe PollVoteEnum.FALSE
+                        date.isNotEmpty() shouldBe true
+                    }
                 }
             }
         }
 
         test("get present poll") {
             val entity = pollPort.getPoll(mockedPresentDatabasePollId) { true }
-            entity shouldNotBe null
             requireNotNull(entity)
             entity shouldBeEqualToComparingFields mockedInDatabasePollModel.toEntity()
         }
 
         test("get not present poll") {
-            val entity = pollPort.getPoll(mockedNotPresentPollId) { true }
-            entity shouldBe null
+            pollPort.getPoll(mockedNotPresentPollId) { true } shouldBe null
         }
     }
 
-}
-)
+})

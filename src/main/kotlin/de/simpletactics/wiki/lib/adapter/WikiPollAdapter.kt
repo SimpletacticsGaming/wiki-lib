@@ -17,22 +17,21 @@ class WikiPollAdapter(
     @Transactional
     override fun savePoll(topicId: Int, poll: PollEntity, hasAccess: () -> Boolean): Int {
         hasAccess.checkAccess("Access denied for saving poll for topicId $topicId")
-        if (wikiSqlAdapter.getWikiType(topicId) != null) {
-            val topic = wikiSqlAdapter.getTopic(topicId)
-            if (topic != null) {
-                val id = pollSqlAdapter.savePoll(poll)
-                wikiSqlAdapter.updateTopic(topic.copy(childIds = topic.childIds + id))
-                return id
-            }
+
+        val topic = wikiSqlAdapter.getTopic(topicId)
+
+        check(wikiSqlAdapter.getWikiType(topicId) != null && topic != null) {
+            throw IllegalArgumentException("No topic found with id $topicId")
         }
-        throw IllegalArgumentException("No topic found with id $topicId")
+
+        val id = pollSqlAdapter.savePoll(poll)
+        wikiSqlAdapter.updateTopic(topic.copy(childIds = topic.childIds + id))
+        return id
     }
 
     override fun getPoll(id: Int, hasAccess: () -> Boolean): PollEntity? {
         hasAccess.checkAccess("Access denied for getting poll with id $id")
-        return if (wikiSqlAdapter.getWikiType(id) != null) {
-            pollSqlAdapter.getPoll(id)
-        } else null
+        return wikiSqlAdapter.getWikiType(id)?.let { pollSqlAdapter.getPoll(id) }
     }
 
     @Transactional
@@ -64,9 +63,8 @@ class WikiPollAdapter(
         return pollSqlAdapter.isPollOpen(id)
     }
 
-    // TODO: Rename to closeExpiredOpenPolls
     @Transactional
-    override fun closeOpenPolls(
+    override fun closeExpiredOpenPolls(
         hasAccess: () -> Boolean,
     ): Int {
         hasAccess.checkAccess("Access denied for closing expired polls")

@@ -9,7 +9,6 @@ import de.simpletactics.wiki.lib.adapter.persistence.mapper.toModel
 import de.simpletactics.wiki.lib.services.port.PollPort
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
-import io.kotest.matchers.shouldNotBe
 import org.springframework.jdbc.core.JdbcTemplate
 import java.util.*
 
@@ -19,26 +18,20 @@ class UpdatePollAdapterTest(
 ) : FunSpecIT(jdbcTemplate, {
 
     val generatedId = 3
-
-    fun getPollFromDb(
-    ) = pollPort.getPoll(generatedId) { true }!!.toModel()
-
+    fun getPollFromDb() = pollPort.getPoll(generatedId) { true }!!.toModel()
 
     context("Update polls") {
 
         beforeTest {
             executeSql("wiki_poll.sql")
-
         }
 
         test("test update question and description") {
             val updatedQuestion = "Updated question"
             val updatedDescription = "Updated description"
             val updatedPoll = getPollFromDb().copy(generatedId, updatedQuestion, updatedDescription)
-
             val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
-            fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
             fetchedPoll shouldBeEqualToComparingFields updatedPoll.toEntity()
         }
@@ -46,20 +39,16 @@ class UpdatePollAdapterTest(
         test("test update date") {
             val sqlDate = Date.getDate()
             val updatedPoll = getPollFromDb().copy(generatedId, date = sqlDate)
-
             val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
-            fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
             fetchedPoll shouldBeEqualToComparingFields updatedPoll.toEntity()
         }
 
         test("test update date set null") {
             val updatedPoll = getPollFromDb().copy(generatedId, date = null)
-
             val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
-            fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
             fetchedPoll shouldBeEqualToComparingFields updatedPoll.toEntity()
         }
@@ -73,10 +62,8 @@ class UpdatePollAdapterTest(
                 )
             )
             val updatedPoll = getPollFromDb().copy(generatedId, pollEntries = pollEntries)
-
             val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
-            fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
             fetchedPoll shouldBeEqualToComparingFields updatedPoll.toEntity()
         }
@@ -93,22 +80,18 @@ class UpdatePollAdapterTest(
             val updatedPoll = getPollFromDb().copy(generatedId, pollEntries = pollEntries)
             val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
-            fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
             fetchedPoll shouldBeEqualToComparingFields updatedPoll.toEntity()
         }
 
         test("test update poll entries with delete") {
-            val pollEntries = getPollFromDb().pollEntries.toMutableList()
-            pollEntries.removeFirst()
+            val pollEntries = getPollFromDb().pollEntries.toMutableList().apply { removeFirst() }
             val updatedPoll = getPollFromDb().copy(generatedId, pollEntries = pollEntries)
             val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
-            fetchedPoll shouldNotBe null
             requireNotNull(fetchedPoll)
             fetchedPoll.pollEntries shouldHaveSize 0
             fetchedPoll shouldBeEqualToComparingFields updatedPoll.toEntity()
         }
     }
-}
-)
+})

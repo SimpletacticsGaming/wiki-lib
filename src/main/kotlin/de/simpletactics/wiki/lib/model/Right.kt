@@ -5,6 +5,4 @@ data class Right(
     val edit: Boolean,
     val create: Boolean,
     val write: Boolean,
-    val admin: Boolean,
-    val mod: Boolean,
 )

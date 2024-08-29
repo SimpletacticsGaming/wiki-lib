@@ -1,67 +1,59 @@
 package de.simpletactics.wiki.lib.adapter.persistence.mapper
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntity
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntryEntity
+import de.simpletactics.wiki.lib.util.jsonObjectMapper
 import org.springframework.jdbc.core.RowMapper
 import java.sql.ResultSet
 
 class TopicRowMapper : RowMapper<TopicEntity> {
 
-    override fun mapRow(rs: ResultSet, rowNum: Int): TopicEntity? {
-        val id = rs.getInt("id")
-        val topic = rs.getString("topic")
-        val childIds = rs.getArray("child_id")
-        val ids = childIds.array as Array<Int>
-        return TopicEntity(id, topic, ids.toList())
+    override fun mapRow(resultSet: ResultSet, rowNum: Int): TopicEntity = with(resultSet) {
+        return TopicEntity(
+            getInt("id"),
+            getString("topic"),
+            (getArray("child_id").array as Array<Int>).toList()
+        )
     }
 
 }
 
 class EntryMapper : RowMapper<EntryEntity> {
 
-    override fun mapRow(rs: ResultSet, rowNum: Int): EntryEntity? {
-        val id = rs.getInt("id")
-        val headline = rs.getString("headline")
-        val body = rs.getString("body")
-        return EntryEntity(id, headline, body)
+    override fun mapRow(resultSet: ResultSet, rowNum: Int): EntryEntity = with(resultSet) {
+        return EntryEntity(
+            getInt("id"),
+            getString("headline"),
+            getString("body")
+        )
     }
 
 }
 
 class IdMapper : RowMapper<Int> {
-    override fun mapRow(rs: ResultSet, rowNum: Int): Int? {
-        return rs.getInt("id")
-    }
+    override fun mapRow(resultSet: ResultSet, rowNum: Int): Int = resultSet.getInt("id")
 }
 
 class PollMapper : RowMapper<PollEntity> {
-    override fun mapRow(rs: ResultSet, rowNum: Int): PollEntity? {
-        val id = rs.getInt("id")
-        val question = rs.getString("question")
-        val description = rs.getString("description")
-        val entries = parseJsonToPollEntity(rs.getString("data") ?: "[]")
-        val ended = rs.getBoolean("ended")
-        val date = rs.getDate("end_date")
-        return PollEntity(id, question, description, entries, ended, date)
+    override fun mapRow(resultSet: ResultSet, rowNum: Int): PollEntity = with(resultSet) {
+        return PollEntity(
+            getInt("id"),
+            getString("question"),
+            getString("description"),
+            parseJsonToPollEntity(getString("data") ?: "[]"),
+            getBoolean("ended"),
+            getDate("end_date"),
+        )
     }
 
     private fun parseJsonToPollEntity(json: String): List<PollEntryEntity> {
-        val mapper = ObjectMapper()
-        return mapper.readValue(
-            json,
-            mapper.typeFactory.constructCollectionType(
-                List::class.java,
-                PollEntryEntity::class.java,
-            ),
-        )
+        return jsonObjectMapper.readValue<List<PollEntryEntity>>(json)
     }
 }
 
 class PollOpenBooleanMapper : RowMapper<Boolean> {
-    override fun mapRow(rs: ResultSet, rowNum: Int): Boolean? {
-        return rs.getBoolean("ended")
-    }
+    override fun mapRow(resultSet: ResultSet, rowNum: Int): Boolean = resultSet.getBoolean("ended")
 }

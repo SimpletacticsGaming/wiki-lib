@@ -7,28 +7,26 @@ import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntity
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollModel
 
 
-fun PollEntity.toModel(): PollModel {
-    return PollModel(
-        this.id,
-        this.question,
-        this.description,
-        this.pollEntries,
-        this.ended,
-        if (this.date != null) Date.getZoneDateTimeFrom(this.date) else null,
-    )
-}
+fun PollEntity.toModel() = PollModel(
+    id,
+    question,
+    description,
+    pollEntries,
+    ended,
+    if (date != null) Date.getZoneDateTimeFrom(date) else null,
+)
 
-fun PollModel.toEntity(): PollEntity {
-    return PollEntity(
-        this.id,
-        this.question,
-        this.description,
-        this.pollEntries,
-        this.ended,
-        if (this.date != null) Date.getSqlDateFrom(this.date) else null,
-    )
-}
 
+fun PollModel.toEntity() = PollEntity(
+    id,
+    question,
+    description,
+    pollEntries,
+    ended,
+    if (date != null) Date.getSqlDateFrom(date) else null,
+)
+
+// FIXME: can this be deleted?
 private fun getOptionSelectionFromVotes(
     votes: List<Vote>,
     userId: Int,

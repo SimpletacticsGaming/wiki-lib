@@ -7,7 +7,7 @@ import de.simpletactics.wiki.lib.adapter.persistence.mapper.IdMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.PollMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.PollOpenBooleanMapper
 import de.simpletactics.wiki.lib.model.WikiNotFoundException
-import de.simpletactics.wiki.lib.services.JsonParser
+import de.simpletactics.wiki.lib.util.jsonObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -15,87 +15,74 @@ import org.springframework.stereotype.Component
 @Component
 class PollSqlAdapter(
     private val jdbc: JdbcTemplate,
-    private val jsonParser: JsonParser,
 ) {
 
     fun savePoll(
         poll: PollEntity,
     ): Int {
-        val date = if (poll.date != null) "'${poll.date}'" else null
         return jdbc.query(
             "insert into wiki_poll (question, description, end_date, ended, data) values(?, ?, ?, ?, ?::jsonb) RETURNING id",
             IdMapper(),
             poll.question,
             poll.description,
-            date,
+            if (poll.date != null) "'${poll.date}'" else null,
             poll.ended,
-            jsonParser.parsetoJson(poll.pollEntries)
+            jsonObjectMapper.writeValueAsString(poll.pollEntries)
         ).first()
     }
 
     fun getPoll(id: Int): PollEntity? {
-        val pollEntry = jdbc.query("select * from wiki_poll where id = ?", PollMapper(), id)
-        return if (pollEntry.isNotEmpty()) {
-            pollEntry.first()
-        } else {
-            null
-        }
+        return jdbc.query("select * from wiki_poll where id = ?", PollMapper(), id).first() ?: null
     }
 
     fun updatePoll(poll: PollEntity): PollEntity? {
-        return if (poll.id != null) {
-            val pollFromDb = getPoll(poll.id)
+        if (poll.id == null) throw WikiNotFoundException("Couldn't update poll. Poll id is null")
 
-            if (pollFromDb != null) {
-                updatingEntries(poll, pollFromDb)
-            }
-            getPoll(poll.id)
-        } else {
-            throw WikiNotFoundException("Couldn't update poll. Poll id is null")
-        }
+        getPoll(poll.id)?.let { updatingEntries(poll, it) }
+        return getPoll(poll.id)
     }
 
     fun setPollVotes(
         userId: Int,
         pollModel: PollEntity,
     ) {
-        val oldPoll = getPoll(pollModel.id!!)
+        if (pollModel.id != null && getPoll(pollModel.id) == null) {
+            // TODO: throw Exception???
+            log.warn("Can not set poll votes because there is no poll with id ${pollModel.id}")
+            return
+        }
 
-        if (oldPoll != null) {
-            pollModel.pollEntries.forEach {
-                val option = getUserVoteOption(it)
-                val date = Date.getDateAsString()
+        pollModel.pollEntries.forEach {
+            val option = getUserVoteOption(it)
+            val date = Date.getDateAsString()
 
-                jdbc.execute(
-                    "UPDATE wiki_poll set data = (" +
-                            "SELECT JSONB_AGG(" +
-                            "CASE when d.value @? '$.pollOption.uuid ? (@ == \"${it.pollOption.uuid}\")' " +
-                            "THEN " +
-                            "CASE when d.value @? '$.votes ?(@.userId == $userId)' " +
-                            "THEN jsonb_set(d.value, '{votes}', " +
-                            "(SELECT JSONB_AGG( " +
-                            "CASE when dd.value @? '$ ?(@.userId == $userId)' AND NOT dd.value -> 'option' @> '\"$option\"'::jsonb " +
-                            "THEN jsonb_set(jsonb_set(dd.value," +
-                            "'{option}', '\"$option\"')" +
-                            ", '{date}', '\"$date\"') " +
-                            "ELSE dd.value " +
-                            "END) " +
-                            "FROM jsonb_array_elements(jsonb_path_query_array(d.value, '$.votes[*]')) dd)" +
-                            " ) " +
-                            "ELSE jsonb_insert(d.value, '{votes, -1}', '{" +
-                            "\"userId\": $userId," +
-                            "\"date\": \"$date\"," +
-                            "\"option\": \"$option\"" +
-                            "}', true) " +
-                            "END " +
-                            "ELSE d.value " +
-                            "END) " +
-                            "FROM jsonb_array_elements(data) d) " +
-                            "where id = ${pollModel.id}",
-                )
-            }
-        } else {
-            log.warn("Could not set poll votes because there is no poll with id ${pollModel.id}")
+            jdbc.execute(
+                "UPDATE wiki_poll set data = (" +
+                        "SELECT JSONB_AGG(" +
+                        "CASE when d.value @? '$.pollOption.uuid ? (@ == \"${it.pollOption.uuid}\")' " +
+                        "THEN " +
+                        "CASE when d.value @? '$.votes ?(@.userId == $userId)' " +
+                        "THEN jsonb_set(d.value, '{votes}', " +
+                        "(SELECT JSONB_AGG( " +
+                        "CASE when dd.value @? '$ ?(@.userId == $userId)' AND NOT dd.value -> 'option' @> '\"$option\"'::jsonb " +
+                        "THEN jsonb_set(jsonb_set(dd.value," +
+                        "'{option}', '\"$option\"')" +
+                        ", '{date}', '\"$date\"') " +
+                        "ELSE dd.value " +
+                        "END) " +
+                        "FROM jsonb_array_elements(jsonb_path_query_array(d.value, '$.votes[*]')) dd)" +
+                        " ) " +
+                        "ELSE jsonb_insert(d.value, '{votes, -1}', '{" +
+                        "\"userId\": $userId," +
+                        "\"date\": \"$date\"," +
+                        "\"option\": \"$option\"" +
+                        "}', true) " +
+                        "END " +
+                        "ELSE d.value " +
+                        "END) " +
+                        "FROM jsonb_array_elements(data) d) " +
+                        "where id = ${pollModel.id}",
+            )
         }
     }
 
@@ -109,14 +96,16 @@ class PollSqlAdapter(
     }
 
     fun isPollOpen(id: Int): Boolean {
-        return !jdbc.query("SELECT ended FROM wiki_poll WHERE id = ?", PollOpenBooleanMapper(), id).first()
+        return !jdbc.query("SELECT ended FROM wiki_poll WHERE id = ?", PollOpenBooleanMapper(), id)
+            .first()
     }
 
     fun closeOpenPolls(): Int {
         return jdbc.update("UPDATE wiki_poll SET ended = true WHERE date < CURRENT_DATE AND ended = false")
     }
 
-    private fun getUserVoteOption(pollEntryEntity: PollEntryEntity) = pollEntryEntity.votes[0].option
+    private fun getUserVoteOption(pollEntryEntity: PollEntryEntity) =
+        pollEntryEntity.votes[0].option
 
     /*
      * jsonb_array_elements() teilt das Array im jsonb auf und gibt die Einzelteile aus.
@@ -130,7 +119,11 @@ class PollSqlAdapter(
     ) {
         jdbc.update(
             "UPDATE wiki_poll SET question = ?, description = ?, end_date = ?, ended = ? WHERE id = ?;",
-            updatedPoll.question, updatedPoll.description, updatedPoll.date, updatedPoll.ended, updatedPoll.id,
+            updatedPoll.question,
+            updatedPoll.description,
+            updatedPoll.date,
+            updatedPoll.ended,
+            updatedPoll.id,
         )
 
         updatedPoll.pollEntries.forEach { updatedPollEntry ->
@@ -140,7 +133,7 @@ class PollSqlAdapter(
             if (oldPollEntry == null) {
                 jdbc.update(
                     "UPDATE wiki_poll SET data = jsonb_insert(" +
-                            "data, '{-1}', '${jsonParser.parsetoJson(updatedPollEntry)}', true) " +
+                            "data, '{-1}', '${jsonObjectMapper.writeValueAsString(updatedPollEntry)}', true) " +
                             "WHERE id = ${updatedPoll.id};",
                 )
             } else if (updatedPollEntry.pollOption.text != oldPollEntry.pollOption.text) {

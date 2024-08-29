@@ -17,26 +17,22 @@ class WikiSqlAdapter(
 
     fun getWikiType(id: Int): WikiType? {
         val result = jdbc.queryForList("SELECT type FROM wiki WHERE id = ?", id)
-        return if (result.size == 1 && result.first().containsKey("type")) {
-            val typeAsString = result.first()["type"].toString()
-            WikiType.valueOf(typeAsString)
-        } else {
-            null
-        }
+
+        return if (result.size != 1 || result.first().containsKey("type").not()) null
+        else WikiType.valueOf(result.first()["type"].toString())
     }
 
     fun getTopic(id: Int): TopicEntity? {
         val result = jdbc.query("SELECT * FROM wiki_topic WHERE id = ?", TopicRowMapper(), id)
-        return if (result.size == 1) {
-            result.first()
-        } else {
-            null
-        }
+        return if (result.size == 1) result.first() else null
     }
 
     fun createTopic(topicEntity: TopicEntity): Int {
-        return jdbc.query("INSERT INTO wiki_topic (topic) VALUES (?) RETURNING id;", IdMapper(), topicEntity.topic)
-            .first()
+        return jdbc.query(
+            "INSERT INTO wiki_topic (topic) VALUES (?) RETURNING id;",
+            IdMapper(),
+            topicEntity.topic
+        ).first()
     }
 
     fun updateTopic(topicEntity: TopicEntity): Int {
@@ -56,11 +52,7 @@ class WikiSqlAdapter(
 
     fun getEntry(id: Int): EntryEntity? {
         val result = jdbc.query("SELECT * FROM wiki_entry WHERE id = ?", EntryMapper(), id)
-        return if (result.size == 1) {
-            result.first()
-        } else {
-            null
-        }
+        return if (result.size == 1) result.first() else null
     }
 
     fun createEntry(entryEntity: EntryEntity): Int {
@@ -93,10 +85,6 @@ class WikiSqlAdapter(
             TopicRowMapper(),
             childId
         )
-        return if (result.size == 1) {
-            result.first()
-        } else {
-            null
-        }
+        return if (result.size == 1) result.first() else null
     }
 }

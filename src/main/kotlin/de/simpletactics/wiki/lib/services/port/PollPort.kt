@@ -40,7 +40,7 @@ interface PollPort {
         hasAccess: () -> Boolean,
     ): Boolean
 
-    fun closeOpenPolls(
+    fun closeExpiredOpenPolls(
         hasAccess: () -> Boolean,
     ): Int
 }
