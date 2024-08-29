@@ -9,6 +9,8 @@ import de.simpletactics.wiki.lib.services.port.WikiPort
 import de.simpletactics.wiki.lib.util.checkAccess
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 @Component
 class WikiAdapter(
@@ -24,11 +26,10 @@ class WikiAdapter(
     override fun createTopic(parentId: Int, topic: String, hasAccess: () -> Boolean): Int {
         hasAccess.checkAccess("Access denied for creating topic for parentId $parentId")
 
+        val wikiType = wikiSqlAdapter.getWikiType(parentId)
         val parent = wikiSqlAdapter.getTopic(parentId)
 
-        check(wikiSqlAdapter.getWikiType(parentId) == WikiType.TOPIC && parent != null) {
-            throw WikiNotFoundException("No topic found to create a child topic with parentId $parentId")
-        }
+        verify(wikiType, WikiType.TOPIC, parent) { "No topic found to create a child topic with parentId $parentId" }
 
         val id = wikiSqlAdapter.createTopic(TopicEntity(null, topic, mutableListOf()))
         wikiSqlAdapter.updateTopic(
@@ -42,11 +43,10 @@ class WikiAdapter(
     override fun updateTopic(id: Int, topic: String, hasAccess: () -> Boolean): Int {
         hasAccess.checkAccess("Access denied for updating topic with id $id")
 
+        val wikiType = wikiSqlAdapter.getWikiType(id)
         val topicEntity = wikiSqlAdapter.getTopic(id)
 
-        check(wikiSqlAdapter.getWikiType(id) == WikiType.TOPIC && topicEntity != null) {
-            throw WikiNotFoundException("No topic found to update with id $id")
-        }
+        verify(wikiType, WikiType.TOPIC, topicEntity) { "No topic found to update with id $id" }
 
         return wikiSqlAdapter.updateTopic(topicEntity.copy(topic = topic))
     }
@@ -55,12 +55,12 @@ class WikiAdapter(
     override fun deleteTopic(id: Int, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for deleting topic for id $id")
 
+        val wikiType = wikiSqlAdapter.getWikiType(id)
         val topic = wikiSqlAdapter.getTopic(id)
         val parent = wikiSqlAdapter.getTopicForChild(id)
 
-        check(wikiSqlAdapter.getWikiType(id) == WikiType.TOPIC && topic != null && parent != null) {
-            throw WikiNotFoundException("No topic found to delete with id $id")
-        }
+        verify(wikiType, WikiType.TOPIC, topic) { "No topic found to delete with id $id" }
+        verify(wikiType, WikiType.TOPIC, parent) { "Can't delete topic with id $id because no parent topic found" }
 
         topic.childIds.forEach { wikiSqlAdapter.deleteEntry(it) }
         wikiSqlAdapter.updateTopic(
@@ -83,11 +83,10 @@ class WikiAdapter(
     ): Int {
         hasAccess.checkAccess("Access denied for creating entry with id $topicId")
 
+        val wikiType = wikiSqlAdapter.getWikiType(topicId)
         val parent = wikiSqlAdapter.getTopic(topicId)
 
-        check(wikiSqlAdapter.getWikiType(topicId) == WikiType.TOPIC && parent != null) {
-            throw WikiNotFoundException("Try to create entry for an undefined topic with topicId $topicId")
-        }
+        verify(wikiType, WikiType.TOPIC, parent) { "Try to create entry for an undefined topic with topicId $topicId" }
 
         val entryId = wikiSqlAdapter.createEntry(EntryEntity(null, headline, body))
         wikiSqlAdapter.updateTopic(
@@ -106,11 +105,10 @@ class WikiAdapter(
     ): Int {
         hasAccess.checkAccess("Access denied for updating entry with id $id")
 
+        val wikiType = wikiSqlAdapter.getWikiType(id)
         val entity = wikiSqlAdapter.getEntry(id)
 
-        check(wikiSqlAdapter.getWikiType(id) == WikiType.ENTRY && entity != null) {
-            throw WikiNotFoundException("No entry found to update with id $id")
-        }
+        verify(wikiType, WikiType.ENTRY, entity) { "No entry found to update with id $id" }
 
         return wikiSqlAdapter.updateEntry(entity.copy(headline = headline, htmlEntry = body))
     }
@@ -119,11 +117,10 @@ class WikiAdapter(
     override fun deleteEntry(id: Int, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for deleting entry with id $id")
 
+        val wikiType = wikiSqlAdapter.getWikiType(id)
         val parent = wikiSqlAdapter.getTopicForChild(id)
 
-        check(wikiSqlAdapter.getWikiType(id) == WikiType.ENTRY && parent != null) {
-            throw WikiNotFoundException("No entry found to delete with id $id")
-        }
+        verify(wikiType, WikiType.ENTRY, parent) { "No entry found to delete with id $id" }
 
         wikiSqlAdapter.updateTopic(
             parent.copy(childIds = parent.childIds.toMutableList().apply { remove(id) })
@@ -135,5 +132,21 @@ class WikiAdapter(
         hasAccess.checkAccess("Access denied for getting type with id $id")
         return wikiSqlAdapter.getWikiType(id)
     }
+}
 
+@OptIn(ExperimentalContracts::class)
+inline fun verify(
+    actualWikiType: WikiType?,
+    shouldBeWikiType: WikiType,
+    shouldNotBeNull: Any?,
+    errorMessage: () -> String
+) {
+
+    contract {
+        returns() implies (shouldNotBeNull != null)
+    }
+
+    if (actualWikiType != shouldBeWikiType || shouldNotBeNull == null) {
+        throw WikiNotFoundException(errorMessage.invoke())
+    }
 }
