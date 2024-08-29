@@ -29,7 +29,11 @@ class UpdatePollAdapterTest(
         test("test update question and description") {
             val updatedQuestion = "Updated question"
             val updatedDescription = "Updated description"
-            val updatedPoll = getPollFromDb().copy(generatedId, updatedQuestion, updatedDescription)
+            val updatedPoll = getPollFromDb().copy(
+                id = generatedId,
+                question = updatedQuestion,
+                description = updatedDescription
+            )
             val fetchedPoll = pollPort.updatePoll(updatedPoll.toEntity()) { true }
 
             requireNotNull(fetchedPoll)

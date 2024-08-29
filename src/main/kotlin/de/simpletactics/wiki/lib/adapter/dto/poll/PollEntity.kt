@@ -6,8 +6,8 @@ import java.time.ZonedDateTime
 data class PollEntity(
     val id: Int?,
     val question: String,
-    val description: String = "",
     val pollEntries: List<PollEntryEntity>,
+    val description: String = "",
     val ended: Boolean = false,
     val date: Date? = null,
 )
@@ -15,8 +15,8 @@ data class PollEntity(
 data class PollModel(
     val id: Int?,
     val question: String,
-    val description: String = "",
     val pollEntries: List<PollEntryEntity>,
+    val description: String = "",
     val ended: Boolean = false,
     val date: ZonedDateTime? = null,
 )

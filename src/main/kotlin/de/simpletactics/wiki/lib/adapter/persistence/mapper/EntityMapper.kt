@@ -10,8 +10,8 @@ import de.simpletactics.wiki.lib.adapter.dto.poll.PollModel
 fun PollEntity.toModel() = PollModel(
     id,
     question,
-    description,
     pollEntries,
+    description,
     ended,
     if (date != null) Date.getZoneDateTimeFrom(date) else null,
 )
@@ -20,8 +20,8 @@ fun PollEntity.toModel() = PollModel(
 fun PollModel.toEntity() = PollEntity(
     id,
     question,
-    description,
     pollEntries,
+    description,
     ended,
     if (date != null) Date.getSqlDateFrom(date) else null,
 )

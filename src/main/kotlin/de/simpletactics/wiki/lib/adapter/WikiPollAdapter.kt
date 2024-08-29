@@ -3,6 +3,7 @@ package de.simpletactics.wiki.lib.adapter
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntity
 import de.simpletactics.wiki.lib.adapter.persistence.PollSqlAdapter
 import de.simpletactics.wiki.lib.adapter.persistence.WikiSqlAdapter
+import de.simpletactics.wiki.lib.model.WikiType
 import de.simpletactics.wiki.lib.services.port.PollPort
 import de.simpletactics.wiki.lib.util.checkAccess
 import org.springframework.stereotype.Component
@@ -18,10 +19,11 @@ class WikiPollAdapter(
     override fun savePoll(topicId: Int, poll: PollEntity, hasAccess: () -> Boolean): Int {
         hasAccess.checkAccess("Access denied for saving poll for topicId $topicId")
 
+        val wikiType = wikiSqlAdapter.getWikiType(topicId)
         val topic = wikiSqlAdapter.getTopic(topicId)
 
-        check(wikiSqlAdapter.getWikiType(topicId) != null && topic != null) {
-            throw IllegalArgumentException("No topic found with id $topicId")
+        verify(wikiType, WikiType.TOPIC, topic) {
+            "No topic found with id $topicId"
         }
 
         val id = pollSqlAdapter.savePoll(poll)

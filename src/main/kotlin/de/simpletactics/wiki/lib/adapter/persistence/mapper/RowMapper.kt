@@ -42,8 +42,8 @@ class PollMapper : RowMapper<PollEntity> {
         return PollEntity(
             getInt("id"),
             getString("question"),
-            getString("description"),
             parseJsonToPollEntity(getString("data") ?: "[]"),
+            getString("description"),
             getBoolean("ended"),
             getDate("end_date"),
         )

@@ -27,7 +27,6 @@ class SavePollAdapterTest(
     val pollModel = PollModel(
         null,
         "This is a test",
-        "",
         listOf(
             PollEntryEntity(
                 PollOption("ddb11436-bdc8-4488-87f6-fsdfsd", "testCase"),
@@ -40,6 +39,7 @@ class SavePollAdapterTest(
                 )
             )
         ),
+        "",
         false,
         null,
     )
@@ -48,7 +48,6 @@ class SavePollAdapterTest(
     val mockedInDatabasePollModel = PollModel(
         mockedPresentDatabasePollId,
         "Frage 1",
-        "Beschreibung 1",
         listOf(
             PollEntryEntity(
                 PollOption("egal1", "test1"), mutableListOf(
@@ -69,6 +68,7 @@ class SavePollAdapterTest(
                 )
             )
         ),
+        "Beschreibung 1",
         false,
         null,
     )
