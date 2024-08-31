@@ -3,14 +3,12 @@ package de.simpletactics.wiki.lib.adapter
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
 import de.simpletactics.wiki.lib.adapter.persistence.WikiSqlAdapter
-import de.simpletactics.wiki.lib.model.WikiNotFoundException
 import de.simpletactics.wiki.lib.model.WikiType
 import de.simpletactics.wiki.lib.services.port.WikiPort
 import de.simpletactics.wiki.lib.util.checkAccess
+import de.simpletactics.wiki.lib.util.verify
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 @Component
 class WikiAdapter(
@@ -29,7 +27,11 @@ class WikiAdapter(
         val wikiType = wikiSqlAdapter.getWikiType(parentId)
         val parent = wikiSqlAdapter.getTopic(parentId)
 
-        verify(wikiType, WikiType.TOPIC, parent) { "No topic found to create a child topic with parentId $parentId" }
+        verify(
+            wikiType,
+            WikiType.TOPIC,
+            parent
+        ) { "No topic found to create a child topic with parentId $parentId" }
 
         val id = wikiSqlAdapter.createTopic(TopicEntity(null, topic, mutableListOf()))
         wikiSqlAdapter.updateTopic(
@@ -60,7 +62,11 @@ class WikiAdapter(
         val parent = wikiSqlAdapter.getTopicForChild(id)
 
         verify(wikiType, WikiType.TOPIC, topic) { "No topic found to delete with id $id" }
-        verify(wikiType, WikiType.TOPIC, parent) { "Can't delete topic with id $id because no parent topic found" }
+        verify(
+            wikiType,
+            WikiType.TOPIC,
+            parent
+        ) { "Can't delete topic with id $id because no parent topic found" }
 
         topic.childIds.forEach { wikiSqlAdapter.deleteEntry(it) }
         wikiSqlAdapter.updateTopic(
@@ -86,7 +92,11 @@ class WikiAdapter(
         val wikiType = wikiSqlAdapter.getWikiType(topicId)
         val parent = wikiSqlAdapter.getTopic(topicId)
 
-        verify(wikiType, WikiType.TOPIC, parent) { "Try to create entry for an undefined topic with topicId $topicId" }
+        verify(
+            wikiType,
+            WikiType.TOPIC,
+            parent
+        ) { "Try to create entry for an undefined topic with topicId $topicId" }
 
         val entryId = wikiSqlAdapter.createEntry(EntryEntity(null, headline, body))
         wikiSqlAdapter.updateTopic(
@@ -132,21 +142,9 @@ class WikiAdapter(
         hasAccess.checkAccess("Access denied for getting type with id $id")
         return wikiSqlAdapter.getWikiType(id)
     }
-}
 
-@OptIn(ExperimentalContracts::class)
-inline fun verify(
-    actualWikiType: WikiType?,
-    shouldBeWikiType: WikiType,
-    shouldNotBeNull: Any?,
-    errorMessage: () -> String
-) {
-
-    contract {
-        returns() implies (shouldNotBeNull != null)
-    }
-
-    if (actualWikiType != shouldBeWikiType || shouldNotBeNull == null) {
-        throw WikiNotFoundException(errorMessage.invoke())
+    override fun getTopicForChild(childId: Int, hasAccess: () -> Boolean): TopicEntity? {
+        hasAccess.checkAccess("Access denied for getting parent topic with id $childId")
+        return wikiSqlAdapter.getTopicForChild(childId)
     }
 }

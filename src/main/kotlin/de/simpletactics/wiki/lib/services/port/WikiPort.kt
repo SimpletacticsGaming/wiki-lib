@@ -24,4 +24,6 @@ interface WikiPort {
 
     fun getWikiType(id: Int, hasAccess: () -> Boolean): WikiType?
 
+    fun getTopicForChild(childId: Int, hasAccess: () -> Boolean): TopicEntity?
+
 }

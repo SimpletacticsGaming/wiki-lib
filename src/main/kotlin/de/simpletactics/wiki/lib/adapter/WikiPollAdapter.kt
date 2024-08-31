@@ -6,6 +6,7 @@ import de.simpletactics.wiki.lib.adapter.persistence.WikiSqlAdapter
 import de.simpletactics.wiki.lib.model.WikiType
 import de.simpletactics.wiki.lib.services.port.PollPort
 import de.simpletactics.wiki.lib.util.checkAccess
+import de.simpletactics.wiki.lib.util.verify
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
