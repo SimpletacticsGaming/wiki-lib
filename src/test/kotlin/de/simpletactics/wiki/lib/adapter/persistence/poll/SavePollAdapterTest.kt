@@ -70,7 +70,7 @@ class SavePollAdapterTest(
         ),
         "Beschreibung 1",
         false,
-        null,
+        Date.getStringAsDate("2023-10-21")
     )
 
 

@@ -25,7 +25,7 @@ class PollSqlAdapter(
             IdMapper(),
             poll.question,
             poll.description,
-            if (poll.date != null) "'${poll.date}'" else null,
+            poll.date,
             poll.ended,
             jsonObjectMapper.writeValueAsString(poll.pollEntries)
         ).first()
@@ -101,7 +101,7 @@ class PollSqlAdapter(
     }
 
     fun closeOpenPolls(): Int {
-        return jdbc.update("UPDATE wiki_poll SET ended = true WHERE date < CURRENT_DATE AND ended = false")
+        return jdbc.update("UPDATE wiki_poll SET ended = true WHERE end_date < CURRENT_DATE AND ended = false")
     }
 
     private fun getUserVoteOption(pollEntryEntity: PollEntryEntity) =
