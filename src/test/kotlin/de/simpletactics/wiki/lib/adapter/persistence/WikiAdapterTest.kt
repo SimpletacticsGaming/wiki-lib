@@ -4,6 +4,7 @@ import de.simpletactics.wiki.lib.adapter.FunSpecIT
 import de.simpletactics.wiki.lib.adapter.WikiAdapter
 import de.simpletactics.wiki.lib.adapter.dto.EntryEntity
 import de.simpletactics.wiki.lib.adapter.dto.TopicEntity
+import de.simpletactics.wiki.lib.model.WikiAccessDeniedException
 import de.simpletactics.wiki.lib.model.WikiNotFoundException
 import de.simpletactics.wiki.lib.model.WikiType
 import io.kotest.assertions.throwables.shouldThrow
@@ -180,6 +181,12 @@ class WikiAdapterTest(
             shouldThrow<WikiNotFoundException> {
                 wikiAdapter.updateTopic(topicId, "Updated Topic 2") { true }
             } shouldBe WikiNotFoundException("No topic found to update with id $topicId")
+        }
+
+        test("access denied test") {
+            shouldThrow<WikiAccessDeniedException> {
+                wikiAdapter.getEntry(23) { false }
+            } shouldBe WikiAccessDeniedException("Access denied for getting entry with id 23")
         }
 
     }
