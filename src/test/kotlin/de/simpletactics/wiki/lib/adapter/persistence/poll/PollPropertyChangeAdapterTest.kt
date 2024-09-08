@@ -21,7 +21,7 @@ class PollPropertyChangeAdapterTest(
             pollPort.isPollOpen(6) { true } shouldBe false
         }
 
-        test("close all open polls") {
+        test("close all open expired polls") {
             pollPort.closeExpiredOpenPolls { true }
             pollPort.isPollOpen(2) { true } shouldBe false
             pollPort.isPollOpen(3) { true } shouldBe true

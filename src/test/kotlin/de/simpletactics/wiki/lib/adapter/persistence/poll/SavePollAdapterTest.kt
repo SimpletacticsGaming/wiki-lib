@@ -23,7 +23,6 @@ class SavePollAdapterTest(
     val mockedNotPresentPollId = 999
     val mockedPresentDatabasePollId = 5
 
-    // Nur im Test hinterlegen
     val pollModel = PollModel(
         null,
         "This is a test",
@@ -44,7 +43,6 @@ class SavePollAdapterTest(
         null,
     )
 
-    // Nur im Test hinterlegen
     val mockedInDatabasePollModel = PollModel(
         mockedPresentDatabasePollId,
         "Frage 1",
