@@ -6,8 +6,10 @@ import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntryEntity
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.IdMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.PollMapper
 import de.simpletactics.wiki.lib.adapter.persistence.mapper.PollOpenBooleanMapper
-import de.simpletactics.wiki.lib.model.WikiNotFoundException
+import de.simpletactics.wiki.lib.model.WikiType
+import de.simpletactics.wiki.lib.services.port.WikiPort
 import de.simpletactics.wiki.lib.util.jsonObjectMapper
+import de.simpletactics.wiki.lib.util.verify
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component
 @Component
 class PollSqlAdapter(
     private val jdbc: JdbcTemplate,
+    private val wikiPort: WikiPort,
 ) {
 
     fun savePoll(
@@ -36,7 +39,7 @@ class PollSqlAdapter(
     }
 
     fun updatePoll(poll: PollEntity): PollEntity? {
-        if (poll.id == null) throw WikiNotFoundException("Couldn't update poll. Poll id is null")
+        checkNotNull(poll.id) { "Couldn't update poll. Poll id is null" }
 
         getPoll(poll.id)?.let { updatingEntries(poll, it) }
         return getPoll(poll.id)
@@ -46,11 +49,14 @@ class PollSqlAdapter(
         userId: Int,
         pollModel: PollEntity,
     ) {
-        if (pollModel.id != null && getPoll(pollModel.id) == null) {
-            // TODO: throw Exception???
-            log.warn("Can not set poll votes because there is no poll with id ${pollModel.id}")
-            return
-        }
+        val pollId = pollModel.id
+        checkNotNull(pollId) { "Can't set poll votes because poll id is null" }
+        val poll = getPoll(pollId)
+        verify(
+            wikiPort.getWikiType(pollId) { true },
+            WikiType.POLL,
+            poll
+        ) { "Can not set poll votes because there is no poll with id ${pollModel.id}" }
 
         pollModel.pollEntries.forEach {
             val option = getUserVoteOption(it)
