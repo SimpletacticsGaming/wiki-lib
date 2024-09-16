@@ -8,7 +8,6 @@ import de.simpletactics.wiki.lib.services.port.WikiPort
 import de.simpletactics.wiki.lib.util.checkAccess
 import de.simpletactics.wiki.lib.util.verify
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 @Component
 class WikiAdapter(
@@ -20,7 +19,7 @@ class WikiAdapter(
         return wikiSqlAdapter.getTopic(id)
     }
 
-    @Transactional
+    @SitaTransactional
     override fun createTopic(parentId: Int, topic: String, hasAccess: () -> Boolean): Int {
         hasAccess.checkAccess("Access denied for creating topic for parentId $parentId")
 
@@ -41,7 +40,7 @@ class WikiAdapter(
         return id
     }
 
-    @Transactional
+    @SitaTransactional
     override fun updateTopic(id: Int, topic: String, hasAccess: () -> Boolean): Int {
         hasAccess.checkAccess("Access denied for updating topic with id $id")
 
@@ -53,7 +52,7 @@ class WikiAdapter(
         return wikiSqlAdapter.updateTopic(topicEntity.copy(topic = topic))
     }
 
-    @Transactional
+    @SitaTransactional
     override fun deleteTopic(id: Int, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for deleting topic for id $id")
 
@@ -80,7 +79,7 @@ class WikiAdapter(
         return wikiSqlAdapter.getEntry(id)
     }
 
-    @Transactional
+    @SitaTransactional
     override fun createEntry(
         topicId: Int,
         headline: String,
@@ -106,7 +105,7 @@ class WikiAdapter(
         return entryId
     }
 
-    @Transactional
+    @SitaTransactional
     override fun updateEntry(
         id: Int,
         headline: String,
@@ -123,7 +122,7 @@ class WikiAdapter(
         return wikiSqlAdapter.updateEntry(entity.copy(headline = headline, htmlEntry = body))
     }
 
-    @Transactional
+    @SitaTransactional
     override fun deleteEntry(id: Int, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for deleting entry with id $id")
 

@@ -8,7 +8,6 @@ import de.simpletactics.wiki.lib.services.port.PollPort
 import de.simpletactics.wiki.lib.util.checkAccess
 import de.simpletactics.wiki.lib.util.verify
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 @Component
 class WikiPollAdapter(
@@ -16,7 +15,7 @@ class WikiPollAdapter(
     private val pollSqlAdapter: PollSqlAdapter,
 ) : PollPort {
 
-    @Transactional
+    @SitaTransactional
     override fun savePoll(topicId: Int, poll: PollEntity, hasAccess: () -> Boolean): Int {
         hasAccess.checkAccess("Access denied for saving poll for topicId $topicId")
 
@@ -37,25 +36,25 @@ class WikiPollAdapter(
         return wikiSqlAdapter.getWikiType(id)?.let { pollSqlAdapter.getPoll(id) }
     }
 
-    @Transactional
+    @SitaTransactional
     override fun updatePoll(poll: PollEntity, hasAccess: () -> Boolean): PollEntity? {
         hasAccess.checkAccess("Access denied for updating poll with id ${poll.id}")
         return pollSqlAdapter.updatePoll(poll)
     }
 
-    @Transactional
+    @SitaTransactional
     override fun setPollVotes(userId: Int, pollModel: PollEntity, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for submitting votes for user with user id $userId and poll with pollId ${pollModel.id}")
         pollSqlAdapter.setPollVotes(userId, pollModel)
     }
 
-    @Transactional
+    @SitaTransactional
     override fun deletePoll(id: Int, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for deleting poll with id $id")
         pollSqlAdapter.deletePoll(id)
     }
 
-    @Transactional
+    @SitaTransactional
     override fun endPoll(id: Int, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for ending poll with id $id")
         pollSqlAdapter.endPoll(id)
@@ -66,7 +65,7 @@ class WikiPollAdapter(
         return pollSqlAdapter.isPollOpen(id)
     }
 
-    @Transactional
+    @SitaTransactional
     override fun closeExpiredOpenPolls(
         hasAccess: () -> Boolean,
     ): Int {
