@@ -34,7 +34,7 @@ java {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-autoconfigure:3.3.2")
     implementation("javax.annotation:javax.annotation-api:1.2-b01")
     implementation("org.apache.commons:commons-collections4:4.4")
@@ -52,6 +52,7 @@ dependencies {
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest:kotest-framework-datatest:$kotestVersion")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
+    testImplementation("io.mockk:mockk:1.13.12")
 }
 
 tasks.withType<Test> {
