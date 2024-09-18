@@ -98,7 +98,7 @@ class PollSqlAdapter(
 
     fun endPoll(id: Int) {
         val date = Date.getSqlDateFrom(Date.getDate())
-        jdbc.update("UPDATE wiki_poll SET date = '?', ended = 'true' WHERE id = ?", date, id)
+        jdbc.update("UPDATE wiki_poll SET end_date = ?, ended = 'true' WHERE id = ?", date, id)
     }
 
     fun isPollOpen(id: Int): Boolean {
