@@ -51,6 +51,14 @@ class WikiPollAdapter(
     @SitaTransactional
     override fun deletePoll(id: Int, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for deleting poll with id $id")
+        val wikiType = wikiSqlAdapter.getWikiType(id)
+        val topicEntity = wikiSqlAdapter.getTopicForChild(id)
+        verify(wikiType, WikiType.POLL, topicEntity) { "No parent found for id $id" }
+        wikiSqlAdapter.updateTopic(
+            topicEntity.copy(childIds = topicEntity.childIds.toMutableList().apply {
+                remove(id)
+            })
+        )
         pollSqlAdapter.deletePoll(id)
     }
 
