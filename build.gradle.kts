@@ -1,5 +1,5 @@
 group = "de.simpletactics"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 val javaVersion = "21"
 
 plugins {
