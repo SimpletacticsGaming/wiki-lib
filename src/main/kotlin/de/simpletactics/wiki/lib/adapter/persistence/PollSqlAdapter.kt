@@ -13,6 +13,7 @@ import de.simpletactics.wiki.lib.util.verify
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+import java.time.ZonedDateTime
 
 @Component
 class PollSqlAdapter(
@@ -108,6 +109,14 @@ class PollSqlAdapter(
 
     fun closeOpenPolls(): Int {
         return jdbc.update("UPDATE wiki_poll SET ended = true WHERE end_date < CURRENT_DATE AND ended = false")
+    }
+
+    fun reopenPoll(id: Int, date: ZonedDateTime?) {
+        val sqlDate = if (date == null) null else Date.getSqlDateFrom(date)
+        jdbc.update(
+            "UPDATE wiki_poll SET ended = 'false', end_date = ? WHERE id = ? AND ended = true",
+            sqlDate, id
+        )
     }
 
     private fun getUserVoteOption(pollEntryEntity: PollEntryEntity) =

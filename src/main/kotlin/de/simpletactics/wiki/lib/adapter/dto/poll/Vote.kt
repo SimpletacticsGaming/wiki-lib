@@ -1,6 +1,7 @@
-package de.simpletactics.model.poll
+package de.simpletactics.wiki.lib.adapter.dto.poll
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import de.simpletactics.wiki.lib.adapter.dto.poll.PollVoteEnum
 
 data class Vote(
     @JsonProperty("userId")

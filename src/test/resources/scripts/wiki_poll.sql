@@ -17,3 +17,6 @@ values (4, 'This is a test', '', '2099-09-24', 'false',
 INSERT INTO wiki_poll (id, question, description, end_date, ended, data)
 values (6, 'This is a test poll to delete', '', null, 'true',
         '[{"votes": [{"userId": "1", "date": "2023-10-21T00:00", "option": "FALSE"}], "pollOption": {"text": "testCase", "uuid": "ddb11436-bdc8-4488-87f6-fsdfsd"}}]');
+INSERT INTO wiki_poll(id, question, description, end_date, ended, data)
+values (30, 'This is a closed test', 'Test description', '2023-10-30', 'true',
+        '[{"votes": [], "pollOption": {"text": "testCase", "uuid": "ddb11436-bdc8-4488-87f6-fsdfsd"}}, {"votes": [], "pollOption": {"text": "testCaseTwo", "uuid": "aaa1436-bdc8-4488-87f6-fsdfsd"}}]');
