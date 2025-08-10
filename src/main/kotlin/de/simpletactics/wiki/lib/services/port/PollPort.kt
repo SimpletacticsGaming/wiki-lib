@@ -1,7 +1,6 @@
 package de.simpletactics.wiki.lib.services.port
 
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntity
-import java.time.ZonedDateTime
 
 interface PollPort {
     fun savePoll(
@@ -47,7 +46,7 @@ interface PollPort {
 
     fun reopenPoll(
         id: Int,
-        date: ZonedDateTime?,
+        date: String?,
         hasAccess: () -> Boolean,
     )
 }
