@@ -1,6 +1,5 @@
 group = "de.simpletactics"
-version = "1.0.0"
-val javaVersion = "21"
+version = "1.1.0-SNAPSHOT"
 
 plugins {
     java
@@ -15,7 +14,6 @@ plugins {
     id("org.springframework.boot")
     id("com.gorylenko.gradle-git-properties")
     id("com.github.ben-manes.versions")
-
 }
 
 apply(plugin = "io.spring.dependency-management")
