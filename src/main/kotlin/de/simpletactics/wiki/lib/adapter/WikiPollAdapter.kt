@@ -1,6 +1,5 @@
 package de.simpletactics.wiki.lib.adapter
 
-import de.simpletactics.wiki.lib.adapter.dto.poll.Date
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntity
 import de.simpletactics.wiki.lib.adapter.persistence.PollSqlAdapter
 import de.simpletactics.wiki.lib.adapter.persistence.WikiSqlAdapter
@@ -9,6 +8,7 @@ import de.simpletactics.wiki.lib.services.port.PollPort
 import de.simpletactics.wiki.lib.util.checkAccess
 import de.simpletactics.wiki.lib.util.verify
 import org.springframework.stereotype.Component
+import java.sql.Date
 
 @Component
 class WikiPollAdapter(
@@ -83,10 +83,9 @@ class WikiPollAdapter(
     }
 
     @SitaTransactional
-    override fun reopenPoll(id: Int, date: String?, hasAccess: () -> Boolean) {
+    override fun reopenPoll(id: Int, date: Date?, hasAccess: () -> Boolean) {
         hasAccess.checkAccess("Access denied for reopening poll")
-        val sqlDate = if (date != null) Date.getSqlDateFrom(Date.getStringAsDate(date)) else null
-        pollSqlAdapter.reopenPoll(id, sqlDate)
+        pollSqlAdapter.reopenPoll(id, date)
     }
 
 }

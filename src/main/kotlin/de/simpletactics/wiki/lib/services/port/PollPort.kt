@@ -1,6 +1,7 @@
 package de.simpletactics.wiki.lib.services.port
 
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntity
+import java.sql.Date
 
 interface PollPort {
     fun savePoll(
@@ -46,7 +47,7 @@ interface PollPort {
 
     fun reopenPoll(
         id: Int,
-        date: String?,
+        date: Date?,
         hasAccess: () -> Boolean,
     )
 }

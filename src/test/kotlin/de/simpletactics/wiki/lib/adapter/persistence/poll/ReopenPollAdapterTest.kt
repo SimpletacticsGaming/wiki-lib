@@ -1,6 +1,7 @@
 package de.simpletactics.wiki.lib.adapter.persistence.poll
 
 import de.simpletactics.wiki.lib.adapter.FunSpecIT
+import de.simpletactics.wiki.lib.adapter.dto.poll.Date
 import de.simpletactics.wiki.lib.services.port.PollPort
 import io.kotest.matchers.shouldBe
 import org.springframework.jdbc.core.JdbcTemplate
@@ -17,7 +18,10 @@ class ReopenPollAdapterTest(
         }
 
         test("Reopen closed poll with date") {
-            pollPort.reopenPoll(30, "2025-08-09") { true }
+            pollPort.reopenPoll(
+                30,
+                Date.getSqlDateFrom(Date.getStringAsDate("2025-08-09"))
+            ) { true }
 
             with(pollPort.getPoll(30) { true }) {
                 this?.date.toString() shouldBe "2025-08-09"
