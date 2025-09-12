@@ -8,6 +8,7 @@ import de.simpletactics.wiki.lib.services.port.PollPort
 import de.simpletactics.wiki.lib.util.checkAccess
 import de.simpletactics.wiki.lib.util.verify
 import org.springframework.stereotype.Component
+import java.sql.Date
 
 @Component
 class WikiPollAdapter(
@@ -79,6 +80,12 @@ class WikiPollAdapter(
     ): Int {
         hasAccess.checkAccess("Access denied for closing expired polls")
         return pollSqlAdapter.closeOpenPolls()
+    }
+
+    @SitaTransactional
+    override fun reopenPoll(id: Int, date: Date?, hasAccess: () -> Boolean) {
+        hasAccess.checkAccess("Access denied for reopening poll")
+        pollSqlAdapter.reopenPoll(id, date)
     }
 
 }

@@ -110,6 +110,13 @@ class PollSqlAdapter(
         return jdbc.update("UPDATE wiki_poll SET ended = true WHERE end_date < CURRENT_DATE AND ended = false")
     }
 
+    fun reopenPoll(id: Int, date: java.sql.Date?) {
+        jdbc.update(
+            "UPDATE wiki_poll SET ended = 'false', end_date = ? WHERE id = ? AND ended = true",
+            date, id
+        )
+    }
+
     private fun getUserVoteOption(pollEntryEntity: PollEntryEntity) =
         pollEntryEntity.votes[0].option
 

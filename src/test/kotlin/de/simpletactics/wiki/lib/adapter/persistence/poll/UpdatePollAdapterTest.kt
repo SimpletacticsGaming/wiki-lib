@@ -1,6 +1,6 @@
 package de.simpletactics.wiki.lib.adapter.persistence.poll
 
-import de.simpletactics.model.poll.PollOption
+import de.simpletactics.wiki.lib.adapter.dto.poll.PollOption
 import de.simpletactics.wiki.lib.adapter.FunSpecIT
 import de.simpletactics.wiki.lib.adapter.dto.poll.Date
 import de.simpletactics.wiki.lib.adapter.dto.poll.PollEntryEntity

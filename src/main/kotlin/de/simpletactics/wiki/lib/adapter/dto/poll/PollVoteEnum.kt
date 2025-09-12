@@ -1,4 +1,4 @@
-package de.simpletactics.model.poll
+package de.simpletactics.wiki.lib.adapter.dto.poll
 
 enum class PollVoteEnum {
     TRUE,
