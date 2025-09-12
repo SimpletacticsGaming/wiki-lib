@@ -2,7 +2,9 @@ package de.simpletactics.wiki.lib.adapter.persistence.poll
 
 import de.simpletactics.wiki.lib.adapter.FunSpecIT
 import de.simpletactics.wiki.lib.adapter.dto.poll.Date
+import de.simpletactics.wiki.lib.model.WikiAccessDeniedException
 import de.simpletactics.wiki.lib.services.port.PollPort
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.springframework.jdbc.core.JdbcTemplate
 
@@ -42,6 +44,15 @@ class ReopenPollAdapterTest(
             pollPort.reopenPoll(2, null) { true }
 
             pollPort.getPoll(2) { true }?.date.toString() shouldBe "2023-10-21"
+        }
+
+        test("Access denied") {
+            shouldThrow<WikiAccessDeniedException> {
+                pollPort.reopenPoll(
+                    30,
+                    Date.getSqlDateFrom(Date.getStringAsDate("2025-08-09"))
+                ) { false }
+            }.message shouldBe "Access denied for reopening poll"
         }
     }
 })
